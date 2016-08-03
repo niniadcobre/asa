@@ -1,0 +1,282 @@
+
+\section{Formas de virtualización}
+\begin{itemize}
+	\item \emph{Hosts} o Anfitriones
+	\item \emph{Guests} o Huéspedes
+	\item Virtualización completa o Emulación
+ 	\begin{itemize}
+		\item Reproducción, mediante software, de la conducta de todo el hardware. Es necesario escribir emuladores para cada dispositivo, lo cual es laborioso, costoso y generalmente difícil; pero presenta la ventaja de que la máquina completamente emulada permite correr cualquier sistema operativo sin modificaciones y sin que ese sistema operativo, ni las aplicaciones, perciban que están corriendo sobre hardware emulado. Esta forma de virtualización presenta la  mayor fidelidad y transparencia, pero performance limitada.
+ 	\end{itemize}
+ 	\item Virtualización asistida por hardware
+	\begin{itemize}
+		\item Apoyo provisto por el hardware para funciones de multiplexado de entrada/salida y manejo especial de memoria. Las generaciones recientes de procesadores (familia Core 2 de Intel en adelante) contienen la funcionalidad necesaria para asistir en la virtualización. Las ventajas consisten en buena performance y el hecho de poder correr en forma virtualizada cualquier sistema operativo sin necesidad de modificarlo. La desventaja es, por supuesto, que se necesita contar con la capacidad necesaria en el hardware.
+ 		\item VMWare, QEMU, KVM, Xen
+	\end{itemize}
+  	\item Paravirtualización
+		\begin{itemize}
+			\item Ejecución de un SO modificado
+ 			\item Reescritura de los drivers del sistema operativo host y de los guests. Los drivers se construyen según el modelo de \textit{split drivers}, o drivers divididos. El sistema operativo host es quien sigue actuando, con la parte inferior de los drivers, sobre los dispositivos físicos. Las máquinas virtuales, al efectuarse un requerimiento de entrada/salida, activan la mitad superior del driver y provocan un trap al monitor de virtualización, que administra los pedidos y los deriva a la mitad inferior del driver. 
+Los nuevos drivers permiten multiplexar entrada/salida entre los dispositivos físicos y una cantidad de dispositivos virtuales asociados. La ventaja principal es la gran performance lograda con respecto a la emulación o virtualización completa. Para determinadas cargas de trabajo, especialmente para programas acotados por CPU, la eficiencia de un conjunto de máquinas paravirtualizadas es muy cercana al óptimo. La principal desventaja es que claramente se necesita modificar o instrumentar el código, tanto del sistema operativo host como de los guests. Sin embargo las aplicaciones siguen funcionando sin modificaciones.
+			\item  Xen, UML, VirtualBox en modo software
+		\end{itemize}
+		\item Virtualización a nivel del SO
+	\begin{itemize}
+		\item Creación de múltiples espacios de usuario independientes en lugar de uno solo (llamados, según la tecnología específica, contenedores, \textit{virtual engines} o VEs, \textit{virtual private servers} o VPS, o \textit{jails}). Permiten al usuario y a las aplicaciones obtener la misma vista que si se tratara de un server real. Implementación avanzada del mecanismo de \textit{chroot}. El kernel ofrece características de administración de recursos para garantizar el uso equitativo de los mismos entre los contenedores. 
+		\item VServer, OpenVZ
+	\end{itemize}
+\end{itemize}
+
+\subsection {Dominios o anillos de protección}
+
+\figura[10]{rings1}{Anillos de protección, normalmente 1 y 2 sin uso}{rings-1.pdf}
+\figura[10]{rings2}{Hipervisor de tipo 1 y sistema guest}{rings-2.pdf}
+
+\begin{itemize}
+	\item Orden de privilegios impuesto por el hardware
+		\begin{itemize}
+		\item Kernel, anillo 0
+		\item Drivers, anillos 1 y 2		
+		\item Aplicaciones, procesos de usuario, anillo 3
+	\end{itemize}
+	\item Posibilita el mecanismo de los system calls
+	\begin{itemize}
+	\item El código que se ejecuta en un anillo más exterior no puede ejecutar instrucciones de los anillos más interiores ni acceder a memoria no asignada 
+	\item El salto a los anillos más interiores se hace por puntos de acceso predefinidos (las llamadas al sistema)	
+	\item Normalmente los kernels monolíticos corren en modo supervisor o kernel anillo 0, y las aplicaciones en modo usuario en el anillo 3 (Fig. \ref{fig:rings1})
+	\end{itemize}
+	\item Hardware de hipervisor (VTx, AMD-V)
+	\begin{itemize}
+		\item Característica de algunos procesadores desde 2005
+		\item Crea un anillo modo 1 donde ejecutar el código privilegiado de las máquinas virtuales (Fig. \ref{fig:rings2})
+	\end{itemize}
+	\item Hipervisor o VMM
+	\begin{itemize}
+		\item Tipo 1
+		\begin{itemize}
+			\item Corre directamente sobre el hardware (Bare Metal)
+			\item XenServer, VMware ESX/ESXi, Hyper-V, Oracle VM Server
+		\end{itemize}		
+		\item Tipo 2
+		\begin{itemize}
+			\item Corre sobre un sistema operativo dado
+			\item VMware Workstation, VirtualBox, KVM
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+
+\section{Aplicaciones} 
+\begin{itemize}
+	\item Para el usuario final
+	\begin{itemize}
+		\item Revolución del multicore
+			\begin{itemize}
+				\item Muchos equipos en uno
+			\end{itemize}
+		\item Probar nuevas distribuciones u otro software
+		\item Probar actualizaciones
+	\end{itemize}
+	\item Para el administrador de sistemas
+	\begin{itemize}
+		\item Independencia del hardware
+		\item Sistemas \textit{legacy}
+		\item \textit{Provisioning}
+		\item \textit{Live Migration} y balance de carga
+		\item Validación de backups, \textit{staging}
+		\item Hosting de servicios
+		\item Consolidación de servidores
+		\begin{itemize}
+			\item Menos espacio
+			\item Menos consumo de energía
+			\item Menos calor disipado
+		\end{itemize}
+		\item Aumentar la disponibilidad
+	\end{itemize}
+\end{itemize}
+
+
+\section{Proxmox}
+
+\begin{itemize}
+	\item PVE - Proxmox Virtual Environment
+	\item Infraestructura para administración de recursos de virtualización
+	\item Virtualización 
+	\begin{itemize}
+		\item KVM
+		\begin{itemize}
+			\item Incorporado al kernel Linux
+			\item Soporta múltiples SOs
+			\item Almacenamiento en archivos o volúmenes
+			\item Raw o QCOW2
+			\item Compatible con otros SO pero costoso en CPU  
+		\end{itemize}		
+		\item Consolas de acceso a VMs
+		\begin{itemize}
+			\item SSH
+			\item VNC
+			\item QXL/Spice
+			\item HTML5
+		\end{itemize}
+	\end{itemize}	
+	\item Containers
+	\begin{itemize}
+		\item 	OpenVZ
+		\begin{itemize}
+		\item Mismo kernel que el host
+		\item Cada contenedor tiene sus propios archivos, bibliotecas, aplicaciones, /proc, /sys, locks, usuarios, grupos, árbol de procesos, red, dispositivos, instancias de IPC
+		\item Puede dárseles acceso a dispositivos reales
+		\item Soporta únicamente Linux
+		\item Almacenamiento en directorio del host	
+		\item Mejor performance
+		\item Turnkey Linux aporta \textit{appliances}
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+
+
+
+\figura{proxmox}{Cliente web de Proxmox}{pve01.png}
+
+\subsection{Línea de comandos}
+
+
+\tabla {pveadmtools}{Herramientas de administración Proxmox}{l|c}
+{
+Utilizar API & pvesh \\
+Estudiar performance & pveperf \\
+Administrar el cluster de PVEs & pvecm  \\
+Administrar contenedores OpenVZ & vzctl \\
+Administrar VMs & qm \\
+Administrar templates & pveam \\
+}
+
+Comando qm
+	\begin{lstlisting}
+	qm start <vmID>			start vm
+	qm stop <vmID>			kill vm (immediate stop)
+	qm shutdown <vmID>		gracefully stop vm (send poweroff)
+	qm reboot <vmID>		reboot vm (shutdown, start)
+	qm reset <vmID>			reset vm (stop, start)
+	qm suspend <vmID>		suspend vm
+	qm resume <vmID>		resume vm
+	qm destroy <vmID>		destroy vm (delete all files)
+	qm startall			start all virtual machines
+	qm stopall [timeout]		stop all virtual machines
+	\end{lstlisting}
+
+Script para agregar discos
+	\begin{lstlisting}
+	#!/bin/bash
+
+	for ((m=501; m<=510; m+=1))
+	do
+		for d in 1 2; do qm set $m -sata$d volume=OSO-LABS:32; done
+		qm config $m
+	done
+	\end{lstlisting}
+
+
+
+		
+\begin{lstlisting}
+	root@pvetest:~# qm config 501
+	balloon: 512
+	bootdisk: ide0
+	cores: 1
+	description: TUASSL-asa010
+	ide0: OSO-LABS:601/base-601-disk-1.qcow2/501/vm-501 disk-2.qcow2,format=qcow2,size=64G
+	ide2: OSO-LABS:iso/CentOS-6.5-x86_64-minimal.iso,media=cdrom
+	memory: 1024
+	name: asa010
+	net0: e1000=6E:AF:21:76:AA:0A,bridge=vmbr2
+	ostype: l26
+	sata1: OSO-LABS:501/vm-501-disk-3.raw,format=raw,size=32G
+	sata2: OSO-LABS:501/vm-501-disk-4.raw,format=raw,size=32G
+	sockets: 1
+	vga: qxl	
+\end{lstlisting}
+
+\subsection{Otras características}
+	\begin{itemize}
+		\item Almacenamiento local o de red iSCSI, NFS, etc
+		\item Importación/exportación a VMWare
+		\item Cliente Web, login Linux/PVE
+		\item Clustering
+		\begin{itemize}
+ 			\item Simétrico, sin nodo central de administración 
+			\item Cluster File System, importante para preservar la disponibilidad
+	 	\end{itemize}		
+ 		\item Backup + Restore
+		\begin{itemize}
+		 	\item Scheduling, compresión, Live Snapshots
+			\item Migración en vivo
+		 \end{itemize}
+		\item Administración de recursos
+	\begin{itemize}
+ 		\item Pools de almacenamiento asignables a usuarios
+ 	\end{itemize}
+\end{itemize}
+
+
+\section{Cloud Computing}
+\begin{itemize}
+	\item Las Clouds son grandes reservorios o \textit{pools} de recursos virtualizados, fácilmente usables y accesibles (tales como hardware, plataformas de desarrollo y/o servicios). 
+	\item Estos recursos pueden ser dinámicamente reconfigurados para ajustarse a una carga variable, permitiendo también una utilización óptima de recursos. 
+	\item Este reservorio de recursos es típicamente explotado a través de un modelo de pago por uso, en el cual los proveedores de infraestructura ofrecen garantías mediante Acuerdos de Nivel de Servicio (SLAs) adaptados a los usuarios. 
+\end{itemize}
+
+
+\figura[12]{cloud}{Modelos de servicio y recursos en Cloud Computing}{cloud.pdf}
+
+\subsection{Propiedades de Cloud Computing}
+\begin{itemize}
+	\item Autoservicio a demanda (\textit{On-Demand Self-Service})
+	\item Amplio acceso a través de la red 
+	\item \textit{Pooling} de recursos
+	\item Elasticidad rápida
+	\item Servicio mensurado
+\end{itemize}
+
+\subsection{Modelos de servicio en Cloud Computing}
+\begin{description}
+	\item[IaaS, Infrastructure-as-a-Service] Máquinas físicas o virtuales, y otros recursos. Bibliotecas de imágenes de máquinas virtuales, almacenamiento de bloques, almacenamiento de archivos o de objetos. Firewalls, balanceadores de carga, direcciones IP, VLANs, paquetes de software. Los usuarios instalan sistemas operativos sobre la infraestructura provista por la Cloud. 
+	\item[PaaS, Platform-as-a-Service] El proveedor ofrece una plataforma de computación, generalmente incluyendo sistema operativo, lenguajes de programación, ambiente de ejecución de programas, bases de datos, web servers. Los desarrolladores de aplicaciones escriben y corren sus soluciones de software sobre la infraestructura provista evitando los costos de comprar y administrar el hardware y software necesario. La Cloud suele adaptar los recursos necesarios a la demanda del usuario. 
+	\item[SaaS, Software-as-a-Service] Los usuarios reciben acceso a software y bases de datos. Los proveedores instalan y operan software de aplicación en la Cloud. Los usuarios no lo administran, ni tienen conocimiento de la infraestructura (generalmente elástica) que soporta esas aplicaciones.
+\end{description}
+
+\subsection{Objetos gestionados}
+\begin{enumerate}
+	\item Aplicaciones
+	\item Datos
+	\item Runtime
+	\item Middleware
+	\item OS
+ 	\item Virtualización
+ 	\item Servers
+ 	\item Storage
+	\item Red
+\end{enumerate}
+
+Según el modelo de servicio ofrecido, el usuario final gestiona los objetos:
+\begin{itemize}
+	\item Software empaquetado: 1-9
+	\item IaaS: 1-5
+	\item PaaS: 1-2 
+	\item SaaS: Nada
+\end{itemize}
+
+
+\tabla{cloud}{Ejemplos de servicios Cloud}{l|c|c|c|c}{						
+					& IaaS & PaaS & SaaS & Open Source \\
+\hline
+Amazon AWS			&\checkmark	&\checkmark	 & & \\
+Apache CloudStack	&\checkmark	& & & \checkmark	\\
+Docker				&\checkmark	& & & \checkmark	\\
+Dropbox				&\checkmark & & & \\
+Eucalyptus			&\checkmark	& & & \checkmark	\\
+Google App Engine	&	 		& \checkmark& & \\
+Google Apps			& 			& \checkmark& \checkmark & \\
+MS Azure 			&\checkmark	&\checkmark	 & & \\
+OpenNebula			&\checkmark	& & & \checkmark	\\
+OpenStack			&\checkmark	& & & \checkmark	\\
+OwnCloud			&\checkmark	& & \checkmark	& \checkmark	
+}

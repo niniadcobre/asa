@@ -1,0 +1,352 @@
+
+\section{Administración de LVM}
+\subsection{Introducción a  LVM}
+\label{sub:introLVM}
+El soporte habitual para los file systems de servidores son los discos magnéticos, particionados según un cierto diseño definido al momento de la instalación del sistema. Las particiones se definen a nivel del hardware. El conjunto de aplicaciones y servicios del sistema utiliza los filesystems que se instalan sobre estas particiones. 
+
+Las particiones de disco son un concepto de hardware, y dado que las unidades de almacenamiento se definen estáticamente al momento del particionamiento, presentan un problema de administración a la hora de modificar sus tamaños. 
+
+
+El diseño del particionamiento se prepara para distribuir adecuadamente el espacio de almacenamiento entre los diferentes destinos a los que se dedicará el sistema. Sin embargo, es frecuente que el patrón de uso del sistema vaya cambiando, y el almacenamiento se vuelva insuficiente o quede distribuido en forma inadecuada. La solución a este problema implica normalmente el reparticionamiento de los discos, operación que obliga a desmontar los filesystems y a interrumpir el servicio. Para redimensionar una partición, normalmente es necesario el reboot del equipo, con la consiguiente interrupción del servicio en producción. 
+
+
+La alternativa consiste en interponer una capa intermedia de software entre el hardware crudo, con sus particiones, y los filesystems sobre los que descansan los servicios. Esta capa intermedia está implementada por Logical Volume Manager (LVM). LVM es un subsistema orientado a flexibilizar la administración de almacenamiento, al interponer una capa de software que implementa dispositivos de bloques lógicos por encima de las particiones físicas. 
+
+Usando LVM, el almacenamiento queda estructurado en capas, y las unidades lógicas pueden crearse, redimensionarse, o destruirse, sin necesidad de reboot, desmontar ni detener el funcionamiento del sistema. Con LVM pueden definirse por software contenedores de filesystems, de límites flexibles, que admiten el redimensionamiento \quotes{en caliente}, es decir sin salir de actividad, mejorando la disponibilidad general de los servicios.
+
+Con LVM pueden agregarse unidades físicas mientras el hardware lo permita, extendiéndose dinámicamente las unidades lógicas y redistribuyendo el espacio disponible a conveniencia. Presenta también otras ventajas como la posibilidad de extraer \emph{snapshots} o instantáneas de un filesystem en funcionamiento (para obtener backups consistentes a nivel de filesystem), y manipular con precisión el mapeo a unidades físicas para aprovechar características del sistema (como \emph{striping} sobre diferentes discos).
+
+
+% subsubsection  (end)
+
+
+
+
+\subsection{Componentes de LVM}
+\label{sub:compLVM}
+En la terminología LVM, los dispositivos de bloques entregados al sistema LVM se llaman PV (physical volumes). Cualquier dispositivo de bloques escribible puede convertirse en un PV de LVM. Esto incluye particiones de discos y dispositivos múltiples como conjuntos RAID. Los PVs se agrupan en VGs (volume groups) que funcionan como \emph{pools} de almacenamiento físico. De cada pool pueden extraerse a discreción LVs (logical volumes), que se comportan nuevamente como dispositivos de bloques, y que pueden, por ejemplo, alojar filesystems. Estos serán los usuarios finales de la jerarquía (Fig. \ref{fig:jerLVM}).
+
+
+\figura{jerLVM}{Jerarquía de componentes LVM}{LVM.png}
+
+
+\recuadro{
+Conviene tener en mente la jerarquía de los siguientes elementos:
+\begin{description}
+	\item [Volumen físico o PV (physical volume)] Es un contenedor físico que ha sido agregado al sistema LVM. Puede ser una partición u otro dispositivo de bloques adecuado.
+	\item [Grupo de volúmenes o VG (volume group)] Es un pool o repositorio de espacio conformado por uno o varios PVs. Un VG ofrece un espacio de almacenamiento virtualmente continuo, cuyo tamaño corresponde aproximadamente a la suma de los PVs que lo constituyen. Los límites entre los PVs que conforman un VG son transparentes.
+	\item [Volumen lógico o LV (logical volume)] Es una zona de un VG que ha sido delimitada para ser usada por otro software, como por ejemplo un filesystem. Los tamaños de los LVs dentro de un VG no necesariamente coinciden con los de los PVs que los soportan.
+\end{description}
+}
+
+
+
+\subsection {Uso de LVM}
+Los pasos lógicos para utilizar almacenamiento bajo LVM son: 
+\begin{itemize}
+	\item Crear uno o más PVs a partir de particiones u otros dispositivos.
+	\item Reunir los PVs en un VG con lo cual sus límites virtualmente desaparecen.
+	\item Particionar lógicamente el VG en uno o más LVs y utilizarlos como normalmente se usan las particiones.
+\end{itemize}
+
+\begin{comment}
+\figura[8]{LVMcomponentes}{Volúmenes físicos (PV), Grupos de Volúmenes (VG) y Volúmenes Lógicos (LV)} {LVM-componentes.jpg}
+\end{comment}
+
+El sistema LVM incluye comandos para realizar estas tareas y en general administrar todas estas unidades. Con ellos se puede, dinámicamente:
+\begin{itemize}
+	\item Redimensionar LVs de modo de ocupar más o menos espacio dentro del VG.
+	\item Aumentar la capacidad de los VGs con nuevos PVs sin detener el sistema.
+	\item Mover LVs a nuevos PVs, más rápidos, sin detener el sistema.
+	\item Usar \emph{striping} entre PVs de un mismo VG para mejorar las prestaciones.
+	\item Tomar una instantánea o \emph{snapshot} de un LV para hacer un backup del filesystem contenido en el LV.
+	\item Tomar una instantánea como medida preventiva antes de una actualización o modificación.
+\end{itemize}
+
+
+
+Los comandos tienen nombres con los prefijos \lstinline$pv$, \lstinline$vg$, \lstinline$lv$, etc. Además, el comando \lstinline$lvm$ ofrece una consola donde se pueden dar esos comandos y pedir ayuda.
+
+	
+
+
+% subsubsection  (end)
+
+\subsection{Redimensionamiento de volúmenes}
+\label{sub:redimVol}
+Una vez creado un LV, su capacidad puede ser reducida o aumentada (siempre que exista espacio extra en el VG que lo contiene) con los comandos \lstinline$lvreduce$ o \lstinline$lvresize$. 
+Si el LV redimensionado contuviera un filesystem, éste también debe ser redimensionado en forma acorde. 
+\begin{itemize}
+	\item Si un filesystem debe ser extendido, primero debe extenderse el LV que lo contiene. 
+	\item Si un filesystem va a ser reducido, luego debe reducirse el LV que lo contiene (en caso contrario, el espacio extra se desperdicia). 
+	\item Si un LV va a ser reducido, primero debe reducirse el filesystem que contiene.
+	\item Si un LV va a ser extendido, luego debe extenderse el fileystem que contiene (en caso contrario, el espacio extra se desperdicia). 
+	\item Si un LV que va a ser reducido está ocupado en un cierto porcentaje, la reducción del LV sólo puede llevarse a cabo en forma segura en dicho porcentaje. 
+\end{itemize}
+
+Este redimensionamiento del filesystem puede ser hecho por el administrador con un comando separado, o automáticamente en el momento de redimensionar el LV.
+
+\subsubsection {Redimensionamiento automático}
+La herramienta \lstinline$resize2fs$, que modifica el tamaño de un filesystem, es capaz de extender los filesystems sin necesidad de desmontar. Sin embargo, para reducir el tamaño de un filesystem, será necesario desmontarlo. 
+
+Aún más conveniente que \lstinline$resize2fs$ es la opción -r de los comandos lvreduce y lvresize. Esta opción tiene en cuenta el tamaño final del LV que se está redimensionando, y modifica el tamaño del filesystem contenido adecuadamente, todo en la misma secuencia de operación. 
+
+\subsubsection {Indicación del nuevo tamaño}
+La opción -L (o --size) indica el nuevo tamaño del LV en bytes, con sufijos M (mega), G (giga), T (tera), etc.
+
+En el comando \lstinline$lvresize$, si el tamaño se indica con un prefijo de signo más o menos, significa que el tamaño debe aumentar o disminuir en la cantidad que se indica a continuación. En cambio, si el tamaño no lleva prefijo, significa que esa cantidad debe ser el tamaño final del LV. En el comando \lstinline$lvreduce$ sólo tiene sentido el signo menos (ejemplos en Cuadro \ref{tab:resize1}).
+
+\tabla{resize1}{Tamaños con y sin signo}{c|l|c}{
+Original &Comando & Final\\
+\hline
+& \lstinline$lvresize -r -L 10G vg0/lv0$  &  10GB \\
+50 GB &  \lstinline$lvresize -r -L -10G vg0/lv0$  &  40GB \\
+ &  \lstinline$lvreduce -r -L -10G vg0/lv0$  &  40GB \\
+& \lstinline$lvresize -r -L +10G vg0/lv0$  &  60GB \\
+\hline
+}
+
+
+
+
+\subsubsection {Bytes y extents}
+El nuevo tamaño para un LV puede darse en múltiplos del byte (MB, GB, TB...) o en \emph{extents} (la unidad mínima de asignación de bloques de LVM, por defecto 4 MB). La opción -L (o --size) indica el tamaño deseado en bytes, y -l (o --extents) en extents.
+
+Al usar extents, se puede opcionalmente indicar el tamaño deseado en términos relativos del tamaño del VG, del LV, o del espacio libre dentro del VG. Por ejemplo, supongamos que:
+
+\begin{itemize}
+	\item el volumen lógico \lstinline$vg0/lv0$ mide 40 GB, 
+	\item el VG \lstinline$vg0$ que lo contiene mide 100 GB, 
+	\item el espacio del VG \lstinline$vg0$ no ocupado por el LV \lstinline$vg0/lv0$ está libre.
+\end{itemize}
+
+
+Bajo estas condiciones, diferentes comandos \lstinline$lvresize$ tienen los efectos que se ven en el Cuadro \ref{tab:res2}.
+
+\tabla{res2}{Uso de extents}{c|l|c|l}{
+Original		& Comando 	& Final 	& \\
+\hline
+ 		&\lstinline$lvresize -r -l 1000 vg0/lv0$  &  4 GB & 1000 extents = 1000 * 4 MB = 4 GB\\
+		&\lstinline$lvresize -r -l +1000 vg0/lv0$  &  44 GB & 40 GB + 4 GB = 44 GB\\
+		&\lstinline$lvresize -r -l +100\%LV vg0/lv0$  &  80 GB & Se duplica el tamaño del LV\\
+	40 GB	&\lstinline$lvresize -r -l -10\%LV vg0/lv0$  &  36 GB & Se reduce el LV en un 10\%\\
+		&\lstinline$lvresize -r -l +10\%VG vg0/lv0$  &  50 GB & Se agrega un 10\% del total del VG\\
+		&\lstinline$lvresize -r -l +10\%FREE vg0/lv0$  &  46 GB & Se agrega un 10\% del espacio libre del VG\\
+		&\lstinline$lvresize -r -l +10\%ORIGIN vg0/snap$  &  14 GB & Si el snapshot era de 10 GB (un 25\% \\
+& &	&	 del LVO), lo extiende en un 10\% del LVO\\
+\hline
+}
+
+
+\subsection{Snapshots y backups}
+\label{sub:snapshots}
+
+Un snapshot es un LV virtual, especialmente preparado, asociado a un LV original cuyo estado se necesita \quotes{congelar} para cualquier propósito de mantenimiento. Una vez creado el snapshot, mediante un mecanismo de \emph{copy-on-write (o COW)}, LVM provee una instantánea o vista inmutable del filesystem original, aunque éste se actualice. Una vez creado el LV virtual de snapshot, sus contenidos son estáticos y permanentemente iguales al LV original. Puede ser montado y usado como un filesystem corriente. El snapshot es temporario y una vez utilizado se descarta. 
+
+La motivación principal del mecanismo de snapshots es la extracción de copias de respaldo. Durante la operación del sistema, las aplicaciones y el kernel leen y escriben sobre archivos, y por lo tanto el filesystem pasa por una sucesión de estados. Una operación de backup que se desarrolle concurrentemente con la actividad del filesystem no garantiza la consistencia de la imagen obtenida, ya que archivos diferentes pueden ser copiados en diferentes momentos, bajo diferentes estados del filesystem. Como consecuencia, la imagen grabada no necesariamente representa un estado concreto de la aplicación; y esto puede dar lugar a problemas al momento de la recuperación del backup. 
+
+Hay muchos escenarios posibles de inconsistencia. Algunos ejemplos son:
+\begin{itemize}
+	\item Una aplicación que mantiene un archivo temporario en disco con modificaciones automáticas y periódicas (por ejemplo, \lstinline$vi$). 
+	\item Aplicaciones que mantienen conjuntos de archivos fuertemente acoplados (bases de datos compuestas por tablas e índices en archivos separados).
+	\item Una instalación de un paquete de software, que suele afectar muchos directorios del sistema. 
+\end{itemize}
+
+Una solución consiste en \quotes{congelar} de alguna forma el estado del filesystem durante la operación de copia (por ejemplo, desmontándolo). Con LVM, gracias al mecanismo de \emph{COW}, esta instantánea puede ser obtenida sin detener la operación del LV original, o sea sin afectar la disponibilidad del servicio. La operación con el filesystem del LV origen (LVO) no se interrumpe, ni modifica en nada la conducta de las aplicaciones que lo estén usando. 
+
+\subsubsection {Dimensionamiento del snapshot}
+
+Para la creación de un snapshot de un LVO se necesita contar con espacio extra disponible (no utilizado por ningún LV) dentro del mismo VG al cual pertenece el LVO. Este espacio extra no necesita ser del mismo tamaño que el LVO. Normalmente es suficiente un 15\% a 20\% del tamaño del LV original. Si el VG no tiene suficiente espacio, debe extenderse previamente.
+
+No es fácil determinar con precisión el tamaño del snapshot, ya que debe ser suficiente para contener todos los bloques modificados en el LVO durante el tiempo en que se use el snapshot; y este conjunto de bloques puede ser variable, dependiendo del patrón de uso del LVO y del medio hacia el cual se pretende hacer el backup (otro disco local, un servidor en la red local, un servidor en una red remota, una unidad de cinta, tienen diferente ancho de banda y diferente demora de grabación).
+
+En el Cuadro \ref{tab:res2} hay un ejemplo de redimensionamiento del LV snapshot en función del tamaño del LVO.
+
+\subsubsection{Creación de snapshots}
+\label{ssub:snapcreate}
+
+Crear un snapshot es preparar un nuevo LV, virtual, con un filesystem virtualmente propio, que se monta en un punto de montado diferente del original (Fig. \ref{fig:snap1}). 
+
+\figura[8]{snap1}{Un LVO y su snapshot}{LVM-snapshot-1.jpg}
+ 
+A partir de este momento se pueden hacer operaciones de lectura y escritura en ambos filesystems separadamente, con efectos distintos en cada caso. 
+
+% subsubsection  (end)
+
+\subsubsection{Lectura y escritura del LVO}
+\label{ssub:lvorw}
+Los snapshots son creados tomando un espacio de bloques de datos (la tabla de excepciones) dentro del mismo VG del LVO. Mientras un bloque no sea modificado, las operaciones de lectura lo recuperarán del LVO. Pero, cada vez que se modifique un bloque del LVO, la versión original, sin modificar, de dicho bloque, será copiada en el snapshot (Fig. \ref{fig:snap2}). 
+
+\figura[8]{snap2}{Escritura de un bloque del LVO}{LVM-snapshot-2.jpg}
+ 
+\subsubsection{Lectura y escritura del snapshot}
+\label{ssub:snaprw}
+De esta manera, el snapshot muestra siempre los contenidos originales del LVO (Fig. \ref{fig:snap3}), salvo que se modifiquen por alguna operación de escritura en el snapshot.
+
+\figura[8]{snap3}{Lectura de un bloque desde el snapshot}{LVM-snapshot-3.jpg}
+
+Los LVs pueden declararse R/O o R/W. En LVM2, los snapshots son R/W por defecto.  Al escribir sobre un filesystem de un LV snapshot R/W, se grabará el bloque modificado en el espacio privado del snapshot sin afectar el LVO (Fig. \ref{fig:snap4}). Al eliminar el snapshot, todas las modificaciones hechas sobre el mismo desaparecen. 
+
+\figura[8]{snap4}{Escritura sobre el snapshot}{LVM-snapshot-4.jpg}
+
+
+
+\subsection {Creación de backups con snapshots}
+\begin{enumerate}
+	\item Se crea un snapshot del LV de interés.
+	\item Se monta el snapshot en modo R/O sobre un punto de montado conocido. 
+	\item Se copian los archivos del snapshot con la técnica de backup que se desee. 
+	\item Se verifica la integridad del backup.
+	\item Si la verificación no fue satisfactoria, se repite el backup.
+	\item En caso satisfactorio, el snapshot se destruye con \lstinline$lvremove <ID del snapshot>$.  
+
+\end{enumerate}
+
+\begin {comment}
+--------------------------------------------
+, en un momento en que el filesystem esté en estado consistente (por ejemplo, al arranque del sistema, mientras aún no ha sido montado, o mientras los servicios están administrativamente detenidos).
+--------------------------------------------
+\end{comment}
+
+\subsection{Uso preventivo de snapshots}
+El mecanismo de snapshots ofrece la posibilidad de recuperar el estado original del LVO al efectuar operaciones que pueden afectar críticamente la integridad u operatividad del sistema, tales como pruebas de instalación, modificación de configuraciones, etc. 
+
+Como se ha visto, el conjunto de datos almacenados en un snapshot está formado por bloques que, o bien provienen del LVO original, en su estado anterior a ser modificados (Fig. \ref{fig:snap2}), o bien, son bloques de archivos que fueron modificados mediante operaciones regulares de escritura sobre el filesystem localizado en el snapshot y montado en modo R/W (Fig. \ref{fig:snap4}). 
+
+En ambos casos, este conjunto de bloques alojados en el snapshot puede volver a ser aplicado sobre el LVO (o \emph{revertido}) con la opción \lstinline$--merge$ del comando \lstinline$lvconvert$. Este comando restituye (\emph{roll-back}) al LVO todos sus bloques originales, que fueron grabados temporariamente en el espacio de excepciones del snapshot, y \emph{luego destruye el snapshot}. 
+
+\subsubsection{Reversión de snapshots}
+Ahora bien, al ser revertido el snapshot sobre el LVO:
+\begin{itemize}
+	\item Si no ha habido ninguna operación de escritura sobre el filesystem del snapshot, el LVO \emph{vuelve al estado original} al momento de ser tomado el snapshot. 
+	\item Si, en cambio, existen archivos en el snapshot que han sido modificados, al revertir el snapshot el LVO \emph{cambia}, asumiendo las modificaciones que se hayan hecho en el snapshot. 
+\end{itemize}
+
+El resultado, para el LVO, será completamente diferente en uno y otro caso. Ambas propiedades pueden aprovecharse para recuperar el estado después de una modificación que no ha sido satisfactoria, con una de las dos técnicas siguientes.
+
+
+\begin{description}
+\item [Técnica 1] Con esta técnica, las modificaciones se realizan sobre el filesystem del LVO y en caso necesario se revierten usando el snapshot intacto. 
+\begin{enumerate}
+	\item Crear el snapshot del LVO, con espacio suficiente para registrar las modificaciones que se piensa hacer.
+	\item Ejecutar las operaciones críticas (instalar, actualizar, modificar) sobre el LVO.
+	\item Verificar el resultado.
+	\begin{itemize}
+		\item Si el resultado fue satisfactorio, destruir el snapshot con \lstinline$lvremove <ID snapshot>$. 
+		\item Si el resultado no fue satisfactorio, recuperar el estado original del LVO con el comando \lstinline$lvconvert --merge <ID del snapshot>$.
+	\end{itemize}
+	\item El snapshot ha sido eliminado.
+\end{enumerate}
+\end{description}
+
+\begin{description}
+\item [Técnica 2] Con esta técnica se deja el LVO fuera de línea, intacto, y se trabaja sobre el snapshot montado en modo R/W. 
+\begin{enumerate}
+	\item Crear el snapshot del LVO, con espacio suficiente para registrar las modificaciones que se piensa hacer.
+	\item Desmontar el LVO y montar en su lugar el snapshot.
+	\item Ejecutar las operaciones críticas (instalar, actualizar, modificar) sobre el snapshot.
+	\item Verificar el resultado.
+	\begin{itemize}
+		\item Si fue satisfactorio, se vuelcan las modificaciones al LVO con  \lstinline$lvconvert --merge <ID del snapshot>$. 
+		\item Si no fue satisfactorio, se elimina el snapshot.
+	\end{itemize}
+	\item Finalmente, en uno u otro caso, el snapshot ha sido eliminado, y se vuelve a montar el LVO en su lugar.
+\end{enumerate}
+\end{description}
+
+
+
+\subsection{Eliminación del snapshot}
+\label{ssub:snapdel}
+
+El snapshot debe ser destruido al finalizar el backup o terminar de usarlo, ya que, al obligar a  copiar  cada bloque del LVO que se modifica, representa un  costo en performance del sistema de I/O. Por lo demás, el snapshot se define con una cierta capacidad, que al ser excedida hace inutilizable el snapshot completo.
+
+% subsubsection  (end)
+
+\subsection{Ejemplos LVM}
+\label{sub:ejemplosLVM}
+
+Creación de Physical Volumes (PV)
+\begin{lstlisting}
+fdisk /dev/sdb
+pvcreate /dev/sdb1 /dev/sdb2
+pvdisplay
+\end{lstlisting}
+
+Creación de Volume Groups (VG)
+\begin{lstlisting}
+vgcreate vg0 /dev/sdb1 /dev/sdb2
+vgdisplay
+\end{lstlisting}
+
+Creación de Logical Volumes (LV)
+\begin{lstlisting}
+lvcreate --size 512M vg0 -n lvol0
+lvcreate -l 50%VG vg0 -n lvol1
+lvcreate -l 50%FREE vg0 -n lvol2
+lvdisplay vg0
+\end{lstlisting}
+
+Examinar LVM
+\begin{lstlisting}
+pvs
+vgs
+lvs
+pvscan
+vgscan
+lvscan
+\end{lstlisting}
+
+Uso de volúmenes
+\begin{lstlisting}
+mkfs -t ext3 /dev/vg0/lvol0
+mkdir volumen
+mount /dev/vg0/lvol0 volumen
+cp *.gz volumen
+ls -l volumen
+\end{lstlisting}
+
+Extensión de un volumen
+\begin{lstlisting}
+umount /dev/vg0/lvol0
+lvextend --size +1G vg0/lvol0
+mount /dev/vg0/lvol0 volumen
+resize2fs /dev/vg0/lvol0 
+\end{lstlisting}
+
+Agregar un disco al sistema
+\begin{lstlisting}
+fdisk /dev/hdd
+pvcreate /dev/hdd1
+vgextend vg0 /dev/hdd1
+lvextend --size +1G vg0/lvol0 
+ext2online /dev/vg0/lvol0 
+\end{lstlisting}
+
+Snapshot de un volumen
+\begin{lstlisting}
+lvcreate -s -n snap --size 100M vg0/lvol0
+ls -l /dev/vg0
+mkdir volumen-snap
+mount /dev/vg0/snap volumen-snap
+ls -l volumen-snap/
+rm volumen/archivo1.tar.gz volumen/archivo2.tar.gz
+ls -l volumen-snap/
+\end{lstlisting}
+
+Destruir un snapshot
+\begin{lstlisting}
+lvremove vg0/snap
+\end{lstlisting}
+% subsubsection Ejemplos LVM (end)
+
+\subsection{Temas de práctica}
+\begin{enumerate}
+	\item Crear una partición, convertirla en PV, crear un VG y definir un LV \lstinline$lv0$ dentro del mismo dejando un 25\% del espacio libre. Crear un filesystem sobre el LV, montarlo y utilizarlo para administrar archivos.
+	\item Definir un nuevo LV \lstinline$lv1$ en el mismo VG creado anteriormente, ocupando la totalidad del espacio del VG.
+	\item Crear otra partición en el mismo u otro medio de almacenamiento, convertirla en PV y adjuntarla al VG del ejercicio anterior. Examinar el resultado de las operaciones con los comandos de revisión correspondientes. 
+	\item Extender el LV \lstinline$lv1$ para ocupar nuevamente la totalidad del espacio del VG extendido. Crear un filesystem sobre el LV, montarlo y utilizarlo para administrar archivos.
+	\item Modificar los tamaños de ambos LVs, extendiendo uno y reduciendo el otro. Recordar que al reducir un LV se debe primero reducir el filesystem alojado, y que para extender un filesystem se debe primero extender el LV que lo aloja. Comprobar que los filesystems alojados siguen siendo funcionales.
+	\item Supongamos que, al querer crear un snapshot de un LV, el administrador recibe un mensaje de error diciendo que el VG no cuenta con espacio disponible. Sugiera un método para enfrentar este problema usando LVM.
+	\item Dado un LV, poner en práctica las técnicas de creación de snapshot para a) obtener un backup, y b) realizar modificaciones sobre el LV volviendo después al estado original.  
+\end{enumerate}

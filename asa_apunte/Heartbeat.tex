@@ -1,0 +1,226 @@
+
+
+\section{Heartbeat}
+
+
+\subsection{Conceptos}
+\textbf{Heartbeat} es un agente de comunicaciones de cluster, cuya función es ofrecer un mecanismo para enviar mensajes entre los nodos en forma confiable, determinar qué nodos pertenecen al cluster en cada momento, y notificar a un gestor de recursos los eventos de cambio de pertenencia al cluster (ingreso o salida de nodos). 
+
+
+Hasta la versión 2.1.3, la misión de Heartbeat era, además de gestionar las comunicaciones, controlar la adquisición y entrega de los recursos servidos por el cluster en función de la pertenencia de los nodos (es decir, era además un CRM, \textit{Cluster Resource Manager}). A partir de la versión 2.1.4, Heartbeat es solamente un agente de comunicaciones, y las funciones de CRM se han desplazado a un proyecto diferente, \textbf{Pacemaker}. A su vez, Pacemaker es un CRM que puede funcionar sobre varios agentes de comunicaciones, como Heartbeat, Corosync, u OpenAIS. Diferentes distribuciones adoptan diferentes stacks de Alta Disponibilidad, pero en general las configuraciones recomendadas actualmente son Pacemaker+Heartbeat, o preferiblemente, Pacemaker+Corosync. 
+
+Sin embargo, de todas formas Heartbeat sigue ofreciendo un CRM minimal para recursos locales que es sumamente sencillo de configurar. Aquí usaremos este CRM (configuración llamada \quotes{V1} o \quotes{\textit{haresources}}) para clusters \textbf{de dos nodos}.
+
+\begin{itemize}
+	\item Para determinar la pertenencia al cluster, Heartbeat establece un tráfico periódico de latidos (\textit{heartbeats}) en ambos sentidos entre los nodos. Mientras cada nodo escuche los latidos del otro, el cluster permanecerá en estado completo.  
+
+\item Al caer un nodo, el sobreviviente dejará de escuchar latidos por un intervalo de tiempo mayor que un umbral dado, y así declarará muerto al nodo \textit{peer}, luego de lo cual asumirá la prestación de determinados servicios. El cluster pasará a \textit{modo degradado}, lo que significa que seguirá prestando servicios, pero sin redundancia, hasta la recuperación del nodo afectado.
+ 
+\item Los eventos posibles que afectan el estado de los recursos son la caída de un nodo, o bien el regreso de un nodo al cluster. Las acciones ante cada evento dependen de la configuración de los servicios que serán alojados en cada nodo, y consistirán en asumir o entregar recursos en un orden preestablecido. 
+
+		\end{itemize}
+
+
+
+
+\subsection{Configuración}
+Heartbeat se configura con tres archivos de control, situados dentro de \code{/etc/ha.d} en la instalación default, y que son \code{ha.cf} (de configuración general), \code{haresources} (de recursos) y \code{authkeys} (de autenticación). 
+
+La configuración de Heartbeat es simétrica, es decir, los tres archivos deben ser \textbf{idénticos} en los dos nodos. El hostname de cada nodo se utiliza para asumir la pertenencia al cluster en la directiva node del archivo ha.cf y para ligar el nodo a su rol en haresources. Lo que identifica el rol del nodo es únicamente su hostname. 
+
+\subsubsection{Archivo de configuración general}
+El archivo \textbf{/etc/ha.d/ha.cf} establece algunos parámetros de configuración general de heartbeat. Los únicos parámetros realmente imprescindibles en este archivo son \textbf{node}, \textbf{auto\_failback} y uno entre \textbf{ucast, mcast} o \textbf{bcast} (respectivamente, unicast, multicast o broadcast). El Cuadro \ref{tab:hacf} muestra ejemplos de algunos parámetros de configuración. 
+
+\tabla{hacf}{Parámetros más importantes para ha.cf}{l|l}{
+\lstinline$logfacility daemon$ & Se usará para logging el facility daemon \\
+\lstinline$node nodo1 nodo2$ & Nodos que participan del cluster \\
+\lstinline$keepalive 2$ & Intervalo en segundos entre latidos \\
+\lstinline$deadtime 10$ & Declarar nodo muerto luego de n segundos \\
+\lstinline$bcast eth0 eth1$ & Por dónde emitir latidos en broadcast \\
+\lstinline$ping_group routers 172.16.20.1 10.0.0.2$ & Pseudomiembros del cluster para comprobar \\ & que la red sigue viva\\
+\lstinline$auto_failback yes$ & Intentar mantener los recursos en su \\ & responsable nominal \\
+\lstinline$respawn hacluster /usr/lib/heartbeat/ipfail$ & Failover en caso de falla de red 
+}
+
+
+\begin{description}
+	\item[node] Define los nodos que integrarán el cluster. En particular es importante que esté correctamente consignado el nombre de cada nodo tal como es entregado por el comando \textbf{uname -n}.
+
+	\item[auto\_failback] La característica de \textbf{auto\_failback yes} es opcional, e implica que luego de un incidente ocurrido al primario de un servicio, y al recuperarse éste, el nodo secundario devolverá el recurso al responsable nominal.
+
+	\item[keepalive] El tiempo de \textbf{keepalive} es el intervalo entre latidos. Debe tenerse en cuenta que, si se propaga el latido por la red de servicio, un tiempo de keepalive muy bajo significará tráfico espurio en la red. 
+
+	\item[deadtime] Este parámetro define el tiempo luego del cual se declara muerto a un nodo que no ha respondido un latido. Un \textbf{deadtime} muy bajo, si bien permite una recuperación del servicio más rápida, implica mayor peligro de ingresar en la condición de \textit{cerebro dividido}, lo que puede ocasionar graves problemas (como el acceso simultáneo al almacenamiento) y requiere intervención humana para ser corregida. El deadtime debe afinarse en función de la capacidad de respuesta del nodo que debe contestar el latido. Si los nodos están sujetos a variaciones importantes en la carga de trabajo, es preferible adoptar una posición conservadora y evitar los problemas de cerebro dividido a costa de un mayor tiempo de failover.
+
+	 
+	\item[bcast, ucast, mcast] Define las interfaces que emitirán heartbeats. Puede utilizarse la red privada, que es confiable, para propagar el latido. Es preferible no utilizar la red de servicio. 
+
+
+	\item[serial y baud] Para obtener redundancia se recomienda utilizar además un enlace serial null-modem. Se agrega una vía de heartbeat alternativa con la directiva serial ttyS0.	
+
+	\item[ping, ping\_group] Con estas directivas se identifican un host de control o un grupo de control de hosts que se supone están siempre activos en la red y pueden contestar pings. Este grupo de control sirve para validar que cada nodo puede acceder a la red, y determinar que una pérdida de latidos realmente se trata de un miembro que no contesta.
+
+	\item[respawn] Esta directiva establece procesos que serán monitoreados por heartbeat y reiniciados en caso de fallo. En el caso normal, el programa que se desea monitorear es ipfail, que vigila si la conectividad del nodo sufre algún inconveniente y en caso necesario entrega los recursos al otro miembro. En la línea de la directiva respawn, el primer argumento es la identidad del usuario con la cual correrá el proceso monitoreado.
+\end{description}
+
+
+
+
+
+\subsubsection{Archivo de recursos}
+El archivo /etc/ha.d/haresources define los recursos que serán propios de cada nodo. Junto al nombre de cada nodo se especifican los recursos que adquirirá ese nodo mientras el cluster opere en modo normal. En modo degradado, el nodo superviviente adquirirá los recursos que sean propios del otro (\quotes{los recursos migrarán} de un nodo al otro). 
+
+Los recursos que Heartbeat es capaz de administrar pueden ser:
+
+
+\begin{enumerate}
+	\item Direcciones IP de servicio, que son asumidas dinámicamente por los nodos.
+	\item Servicios del sistema, que pueden ser lanzados por un script de control habitual (de los que se alojan en /etc/init.d o /etc/rc.d/init.d).
+	\item Scripts especiales de Heartbeat (\textit{resource agents}), localizados en /etc/ha.d/resource.d, que se comunican con otros servicios con interfaz más compleja.
+\end{enumerate}
+
+El gestor de recursos minimal de Heartbeat inicializará cada recurso al arranque del servicio heartbeat, y con ellos manejará el arranque y detención de esos servicios al producirse eventos de pertenencia.
+\\
+\newline
+\recuadro{
+Los recursos \textbf{se adquieren de izquierda a derecha} tal como están enumerados en haresources y se liberan de derecha a izquierda cuando el nodo sale del rol primario. 
+}
+
+
+\begin{itemize}
+	\item Ejemplo sencillo de archivo \textbf{haresources} para un cluster activo-standby:
+
+\begin{lstlisting}
+nodo1	httpd 172.16.20.101 
+\end{lstlisting}
+
+Aquí se especifican:
+\begin{itemize}
+	\item El servicio httpd, invocado por el script localizado en /etc/rc.d/init.d o /etc/init.d, que será lanzado al inicio o al momento de failover.
+	\item La dirección de servicio que será asumida por una interfaz secundaria, creada dinámicamente por Heartbeat.
+	\item El nodo que es el preferido para asumir los recursos \quotes{servicio httpd} y \quotes{dirección IP}.
+\end{itemize}
+\item Ejemplo de archivo \textbf{haresources} para un cluster activo-activo sencillo:
+
+\begin{lstlisting}
+nodo1	postfix 172.16.20.101 
+nodo2	httpd 172.16.20.102
+\end{lstlisting}
+
+Aquí se especifican:
+\begin{itemize}
+	\item Los servicios postfix y httpd, dependientes de /etc/rc.d/init.d o /etc/init.d.
+	\item Las direcciones de los dos servicios principales del cluster, que serán asumidas por interfaces secundarias, creadas dinámicamente por Heartbeat.
+	\item Los nodos que son preferidos para cada servicio y dirección IP.
+\end{itemize}
+
+
+\item Ejemplo de archivo \textbf{haresources} para un cluster activo-activo un poco más complejo:
+
+\begin{lstlisting}
+nodo1	drbddisk::drbd0 \
+		Filesystem::/dev/drbd0::/mnt/mail::ext3 \
+		postfix \
+		172.16.20.101 
+nodo2	drbddisk::drbd1 \
+		Filesystem::/dev/drbd1::/mnt/web::ext3 \
+		httpd \
+		172.16.20.102
+\end{lstlisting}
+
+Aquí se especifican:
+\begin{itemize}
+	\item Los \textit{resource agents} \code{drbddisk} y \code{Filesystem}. Los argumentos para esos scripts se indican con \quotes{::}.
+	\item Los recursos DRBD drbd0 y drbd1 definidos en el archivo de configuración /etc/drbd.conf, con sus nombres tal como figuran en dicho archivo.
+	\item Los filesystems ubicados sobre los recursos DRBD, con su dispositivo, punto de montado y tipo de filesystem.
+	\item Los servicios, dependientes de /etc/rc.d/init.d o /etc/init.d, que utilizarán esos filesystems.
+	\item Las direcciones de esos dos servicios principales del cluster, que serán asumidas por interfaces secundarias, creadas dinámicamente por Heartbeat.
+\end{itemize}
+
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+\subsubsection{Archivo de autenticación}
+El archivo /etc/ha.d/authkeys permite la autenticación de un nodo frente al otro por uno de tres métodos posibles. Debe tener permisos restrictivos (0600). Puede ser generado con un script tal como el siguiente.
+
+\begin{lstlisting}
+DATE=$(date)
+cat <<-!AUTH >/etc/ha.d/authkeys
+  # Generado automaticamente $DATE
+  auth 1
+  1 sha1 $(dd if=/dev/urandom count=4 2>/dev/null | md5sum | cut -c1-32)
+!AUTH
+chown root:root /etc/ha.d/authkeys
+chmod 0600 /etc/ha.d/authkeys
+\end{lstlisting}
+
+% \subsubsection{Configuración de los servicios}
+% Los servicios del cluster deben ser configurados para utilizar el almacenamiento replicado provisto por DRBD. Por ejemplo, si el servicio fuera el server HTTP Apache, se deberá indicar que la raíz de los documentos servidos por Apache se ubica en algún lugar del filesystem replicado. Opcionalmente, cuando lo permitan las aplicaciones, otros archivos (como los de configuración u otros auxiliares de runtime) pueden quedar soportados dentro de este filesystem, y sus ubicaciones originales reemplazadas por links simbólicos a éstos.
+% Estos servicios deben depender de un script de control como los normalmente proporcionados por el sistema2. El proceso heartbeat buscará los scripts de inicialización al arranque del sistema, y manejará el arranque y detención de esos servicios.
+% 
+
+\subsection{Entrega de los servicios a Heartbeat}
+\begin{itemize}
+	\item Heartbeat requiere el control del arranque y parada de los servicios que componen los grupos de recursos. 
+	\item Los recursos del cluster no deben ser lanzados automáticamente a la inicialización del sistema, es decir, se debe deshabilitar el lanzamiento de los servicios que deben quedar bajo control de Heartbeat (en el ejemplo anterior, httpd y postfix).
+	\item La deshabilitación debe hacerse para todos los runlevels bajo los cuales se piense hacer correr al sistema (típicamente 3 y 5).
+	\item Habilitar el arranque de Heartbeat al inicio.
+\end{itemize}
+
+\subsection{Monitoreo de Heartbeat}
+
+La salida de logging de Heartbeat depende de la configuración. Cuando la salida se dirige al log del sistema host, el comando \code{tail -f /var/log/messages | grep heartbeat} muestra la actividad en forma continua. Otros archivos de logging pueden ser \code{/var/log/ha-log}, \code{/var/log/ha-debug}.
+
+
+\subsection{Testing del cluster}
+Es imprescindible llevar a cabo algunos tests para verificar la corrección de la configuración.
+
+\begin{enumerate}
+	\item \textbf{Desconectar la alimentación del servidor primario}
+
+En el servidor secundario, heartbeat debe detectar la pérdida de latidos e iniciar un failover. Deberán ser iniciados los scripts de recursos correspondientes. El secundario debe enviar broadcasts ARP gratuitos para notificar al resto de la red que la dirección MAC correspondiente al IP de servicio ha cambiado.
+	\item \textbf{Comprobar el efecto del comando hb\_standby}
+
+Verificar que el comando hb\_standby en el primario fuerza la migración de los recursos al secundario. Nuevamente verificar que el mismo comando, dado en el secundario, devuelve los servicios al primario.
+	\item \textbf{Desconectar la conexión a la red de producción del primario}
+
+El servicio ipfail debe detectar esta condición y los recursos deben recaer sobre el secundario.
+
+	\item \textbf{Desconectar uno de los caminos de heartbeat entre los dos servidores}
+
+Debe existir dos o más caminos de heartbeat entre los servidores para evitar los falsos positivos. Al eliminar uno de estos caminos, la operación no debe sufrir ningún cambio.
+	\item \textbf{Desconectar todos los caminos de heartbeat entre los dos servidores}
+
+Si se está usando algún dispositivo de Stonith, el secundario debe suponer que el primario ha salido de servicio, iniciar un evento de Stonith, y asumir los recursos. Lo que siga dependerá de cómo se ha configurado Stonith y de si se está usando o no la opción auto\_failback. Con Stonith y auto\_failback, ambos servidores comenzarán cíclicamente a sacarse de servicio mutuamente. Para evitarlo, deshabilitar auto\_failback.
+	\item \textbf{Matar el daemon heartbeat en el primario}
+
+El secundario debe ejecutar Stonith sobre el primario antes de asumir los servicios para evitar un escenario de split-brain.
+	\item \textbf{Matar los daemons de servicios en el server primario}
+
+Si se están usando cl\_status y/o cl\_respawn, o la aplicación de monitoreo Mon, el cluster debe tomar la acción correspondiente (reiniciar los servicios, alertar al administrador).
+	\item \textbf{Rebootear ambos servidores}
+	
+Los servidores deben arrancar correctamente y dejar los servicios activos en su primario. Esta acción de tuning puede sugerir un cambio en la configuración del tiempo initdead si el secundario trata de capturar los servicios antes de que el primario termine de bootear. 
+\end{enumerate}
+
+
+\subsection{Notas de instalación}
+\begin{itemize}
+	\item En RedHat/CentOS: \code{yum install epel-release; yum update}
+	\item Configuraciones ejemplo en \code{/usr/share/doc/heartbeat-X.XX}
+	\item Scripts auxiliares en \code{/usr/share/heartbeat}.
+\end{itemize}
+
+
+
+% 
+% \section{Pacemaker + Corosync}
+% http://clusterlabs.org/quickstart-redhat.html

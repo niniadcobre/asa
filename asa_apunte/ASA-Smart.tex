@@ -1,0 +1,29 @@
+\section{SMART}
+
+La tecnología SMART (Self-Monitoring, Analysis and Reporting Technology) es un conjunto de funciones útiles para verificar la confiabilidad de los discos y predecir sus fallos. Estas funciones se incorporan en casi todos los discos rígidos electromecánicos ATA y SCSI actuales, así como en los de estado sólido. Los discos dotados de SMART pueden ejecutar varias clases de tests sobre sí mismos, y reportar sus resultados.
+
+La interfaz SMART puede ser usada por el hardware o desde software adecuado. Normalmente el firmware BIOS puede hacer uso de SMART ejecutando un chequeo de salud de los discos al inicio del equipo y denunciando problemas potenciales o existentes. El paquete de software \lstinline{smartmontools} permite utilizar las funciones de SMART de los discos desde varios sistemas operativos.
+
+\subsection{Atributos}
+La tecnología SMART incorpora sensores de ciertas variables físicas, y contadores de una cantidad de eventos relevantes, que describen la historia y el estado de los discos. El firmware SMART del disco almacena estos datos, llamados atributos, en memoria no volátil situada en el mismo disco, y los actualiza automáticamente. Cada disco, dependiendo del fabricante, del modelo y del nivel de la especificación ATA al cual adhiere, mantiene un conjunto de estos atributos. Se numeran entre 1 y 253, y tienen nombres específicos. Se dice que dos terceras partes de los fallos de los discos pueden ser predichos observando los valores de determinados atributos. También puede determinarse si un disco ha llegado al fin de su vida útil en base a estos valores.
+
+Los atributos SMART tienen un \quotes{valor crudo} o \emph{raw} y un \quotes{valor normalizado}. El valor crudo de cada atributo tiene una interpretación dada en ciertas unidades. En el caso del atributo 12 (Fig. \ref{fig:smart}), llamado \lstinline{power_cycle_count}, por ejemplo, el valor crudo es simplemente un entero que representa la cantidad de veces que el disco ha sido activado; para otros atributos, debe interpretarse como una temperatura en grados Celsius (atributo 194,  \lstinline{temperature_celsius}), una cantidad de horas (atributo 9, \lstinline{power_on_hours}), etc. Estos valores de interpretación natural corren, lógicamente, sobre diferentes escalas. El \quotes{valor normalizado} de un atributo, por el contrario, está siempre entre 1 y 254, y se obtiene del valor crudo mediante una función matemática que es computada por el firmware del mismo disco. Estos valores normalizados, al ser comparados con determinados umbrales, denuncian la aparición de problemas. El fabricante del disco, que es quien conoce los detalles de construcción y funcionamiento del disco, provee el algoritmo para computar la función de normalización y el valor del umbral para cada atributo. SMART almacena el valor normalizado actual y el \quotes{peor valor} histórico (el menor valor normalizado obtenido desde la primera puesta en operación del disco hasta el momento actual) de cada atributo. 
+
+\subsection{Diagnósticos}
+SMART agrupa los atributos en dos clases: \emph{Old Age} y \emph{Pre-failure}. Los primeros sirven para diagnosticar cuándo un disco ha llegado al término de su vida útil, y los segundos para diagnosticar fallos efectivos o inminentes de los discos.
+Si, en algún caso, el valor normalizado de un atributo resulta inferior o igual a su umbral, entonces el diagnóstico depende del tipo del atributo. Si un disco tiene un atributo de tipo Old Age cuyo valor normalizado es inferior al umbral, entonces se concluye que el disco ha superado su vida útil según el diseño del producto. Si un atributo es de tipo Pre-failure y su valor normalizado es inferior al umbral, entonces se anuncia un fallo inminente en 24 horas\footnote{En un estudio publicado por Google (Eduardo Pinheiro et al., Failure Trends in a Large Disk Drive Population. USENIX V, 2007) se muestra evidencia, obtenida sobre una población muy grande, de que los fallos de discos están correlacionados sobre todo con dos variables mantenidas por SMART: los errores de superficie (scan errors) y los eventos de reubicación de sectores (reallocation count).}. Si el \quotes{peor valor}  de un atributo de tipo Pre-failure es menor que el umbral, es indicio seguro de que el disco ha presentado un fallo en algún momento anterior.
+
+
+\figura{smart}{Parte del informe SMART}{SMART.png}
+
+
+\subsection{Tests}
+
+SMART provee tres clases de tests, que pueden hacerse sin riesgo durante la operación normal del sistema y no causan errores de lectura ni de escritura. La primera categoría se llama \emph{online testing}, y no tiene efecto sobre la performance del dispositivo. La segunda categoría se llama \emph{offline testing}, y puede causar una degradación de la performance, aunque en la práctica esto es raro porque el disco suspende el test cada vez que hay actividad de lectura o escritura. Estas dos primeras categorías de tests deberían más bien llamarse \quotes{adquisición de datos}, ya que simplemente se ocupan de actualizar constantemente los valores de los atributos. 
+La tercera categoría es un test propiamente dicho, y se llama \emph{self test}. 
+% subsection  (end)
+
+\subsection{Paquete smartmontools}
+
+Comprende dos componentes: el daemon smartd y la interfaz de usuario smartctl. El daemon smartd habilita las funciones de SMART en los discos y consulta su estado cada cierto intervalo. Los parámetros de operación de smartd se indican en su archivo de configuración \lstinline{/etc/smartd.conf}. La herramienta smartctl sirve para consultar el estado de los discos y ejecutar tests.
+

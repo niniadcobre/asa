@@ -1,0 +1,221 @@
+\section{Backups}
+\subsection{Decisiones sobre los respaldos}
+\begin{itemize}
+	\item Propósitos y requerimientos legales, confidencialidad, etc.
+	\item Archivos a respaldar 
+	\begin{itemize}
+		\item Archivos de sistema, de los usuarios, de las aplicaciones
+		\item Vuelcos de bases de datos, formatos portables
+	\end{itemize}	
+	\item Dinámica de los archivos
+	\begin{itemize}
+		\item Estáticos o volátiles 
+		\item Tasa de crecimiento 
+	\end{itemize}
+	\item Período de cobertura (ventana de seguridad)
+	\item Esquema y política de respaldo 
+	\begin{itemize}
+		\item Quién es responsable
+		\item Frecuencia y alcance de cada operación de backup
+		\item Diarios, semanales
+		\item Completos, diferenciales, incrementales
+	\end{itemize}
+	\item Almacenamiento del respaldo 
+	\begin{itemize}
+		\item Dónde se guarda
+		\item Quién y cómo accede
+		\item Recuperación de desastres, sitios remotos
+	\end{itemize}
+	\item Medios de respaldo (cinta, disco, DVD...)
+	\begin{itemize}
+		\item Costo en tiempo de respaldo
+		\item Costo en tiempo de restauración
+		\item Costo monetario por byte de almacenamiento 
+	\end{itemize}
+	\item Presupuesto en medios
+	\item Herramienta y formato (ftp, sftp, scp, tar, cpio, rsync, dd...)  
+	\item Sistema de apoyo (AMANDA, Bacula, BackupPC, Mondo...)
+	\item Procedimiento de restauración
+	\item Procedimiento de verificación
+	\item Eliminación del respaldo
+	\begin{itemize}
+		\item Quién lo hace
+		\item El medio se destruye o se reutiliza 
+	\end{itemize}
+	\item ¿Cómo escala la solución? ¿Se adapta al crecimiento de los datos?
+\end{itemize}
+
+
+
+\section{Sincronización de archivos}
+
+\subsection{Herramienta rsync}
+
+Rsync es un comando de sincronización de directorios y archivos. Puede usarse básicamente como un reemplazo de los comandos rcp o scp, pero presenta gran cantidad de opciones interesantes. Entre otras cosas, utiliza un algoritmo propio para computar las diferencias entre los archivos origen y destino antes de iniciar la copia, y transfiere únicamente las modificaciones. Es decir, para aquellos archivos que son diferentes entre origen y destino, únicamente copia aquellos bloques de datos que son efectivamente diferentes.  
+
+Las opciones de rsync son muy numerosas (ver Anexo \ref{sec:rsync}). Algunas de las más utilizadas:
+
+
+\begin{lstlisting}
+rsync -av \                             # modo archive y modo verbose
+  --compress \                          # comprimir al transferir
+  --force \                             # borrar directorios aun si no vacios
+  --delete \                            # borrar archivos no existentes
+  --delete-excluded \                   # borrar tambien los excluidos
+  --ignore-errors \                     # borrar aun bajo error
+  --exclude-from=exclude_file \         # excluir los archivos listados
+  --backup \                            # modo backup
+  --backup-dir=`date +%Y-%m-%d` \       # directorio del modo backup
+  origen destino
+\end{lstlisting}
+
+La opción -a funciona como sinónimo de un conjunto de otras opciones convenientes para las copias de respaldo en general. Esta opción equivale a -rlptgoD, que se traduce como r=recursivo; l=respetar los links simbólicos; p=preservar los permisos, t=los tiempos de acceso de los archivos, g=el grupo y o=el dueño; y D=recrear los pseudoarchivos de dispositivos en el lado destino. La compresión de archivos será conveniente cuando origen y destino se sitúen en equipos diferentes sobre la red.
+
+
+Rsync puede usarse de muchas formas:
+\begin{itemize}
+	\item Copia de archivos locales, cuando ninguno de los elementos origen y destino contiene un separador \emph{dos puntos} (\quotes{:}).
+	\item Copia entre host local y host remoto usando un shell remoto (por defecto, ssh) como transporte, cuando el destino contiene \quotes{:}.
+	\item Copia desde un servidor rsync remoto al host local, cuando el origen contiene un separador \quotes{::} o es un URL que comienza en \quotes{rsync://}
+	\item Copia entre el host local y un servidor rsync en el host remoto usando un shell como transporte, caso en que el origen contiene un separador “::” y se da la opción –rsh=COMMAND
+\end{itemize}
+
+
+\subsubsection{Especificación del origen}
+
+La sintaxis de rsync tiene una particularidad: al especificar el directorio origen de la copia debe tenerse en cuenta que una barra al final (“/”) indica copiar solamente los contenidos del directorio origen, mientras que si no está presente la barra se entiende que el directorio también debe copiarse en el destino. 
+
+\begin{lstlisting}
+$ ll xmms
+total 2052
+-rw-rw-r--  1 oso oso 1973069 Aug  5 11:18 xmms-1.2.10-16.i386.rpm
+-rw-rw-r--  1 oso oso   36388 Aug  5 11:18 xmms-cdread-0.14-6.a.i386.rpm
+-rw-rw-r--  1 oso oso   79784 Aug  5 11:18 xmms-mp3-1.2.10-0.lvn.3.4.i386.rpm
+\end{lstlisting}
+
+El comando \lstinline$rsync -avz xmms/ xmms2$ copiará los tres archivos en un nuevo directorio llamado xmms2. En cambio, el comando \lstinline$rsync -avz xmms xmms2$ producirá lo siguiente.
+
+\begin{lstlisting}
+$ rsync -avz xmms xmms2
+building file list ... done
+created directory xmms2
+xmms/
+xmms/xmms-1.2.10-16.i386.rpm
+xmms/xmms-cdread-0.14-6.a.i386.rpm
+xmms/xmms-mp3-1.2.10-0.lvn.3.4.i386.rpm
+
+sent 2068345 bytes  received 92 bytes  827374.80 bytes/sec
+total size is 2089241  speedup is 1.01
+$ ll xmms2
+total 4
+drwxrwxr-x  2 oso oso 4096 Aug  5 11:28 xmms
+\end{lstlisting}
+
+\subsubsection{Modo backup}
+El modo backup de rsync hace que los archivos preexistentes en el destino sean renombrados cada vez que se reemplazan o se borran. La opción --backup-dir controla dónde serán creadas estas copias de backup con nuevos nombres. La opción --backup-suffix indica qué extensión tendrán estos archivos (por defecto se agrega un signo \quotes{\textasciitilde}).
+En el caso anterior, supongamos que luego de hacer la copia, se modifican los archivos presentes en xmms.
+
+\begin{lstlisting}
+$ ll xmms2/xmms/
+total 2052
+-rw-rw-r--  1 oso oso 1973069 Aug  5 11:18 xmms-1.2.10-16.i386.rpm
+-rw-rw-r--  1 oso oso   36388 Aug  5 11:18 xmms-cdread-0.14-6.a.i386.rpm
+-rw-rw-r--  1 oso oso   79784 Aug  5 11:18 xmms-mp3-1.2.10-0.lvn.3.4.i386.rpm
+$ touch xmms/*
+$ rsync -avz --backup xmms xmms2
+building file list ... done
+xmms/xmms-1.2.10-16.i386.rpm
+xmms/xmms-cdread-0.14-6.a.i386.rpm
+xmms/xmms-mp3-1.2.10-0.lvn.3.4.i386.rpm
+
+sent 2068339 bytes  received 86 bytes  827370.00 bytes/sec
+total size is 2089241  speedup is 1.01
+$ ll xmms2/xmms/
+total 4104
+-rw-rw-r--  1 oso oso 1973069 Aug  5 11:30 xmms-1.2.10-16.i386.rpm
+-rw-rw-r--  1 oso oso 1973069 Aug  5 11:18 xmms-1.2.10-16.i386.rpm~
+-rw-rw-r--  1 oso oso   36388 Aug  5 11:30 xmms-cdread-0.14-6.a.i386.rpm
+-rw-rw-r--  1 oso oso   36388 Aug  5 11:18 xmms-cdread-0.14-6.a.i386.rpm~
+-rw-rw-r--  1 oso oso   79784 Aug  5 11:30 xmms-mp3-1.2.10-0.lvn.3.4.i386.rpm
+-rw-rw-r--  1 oso oso   79784 Aug  5 11:18 xmms-mp3-1.2.10-0.lvn.3.4.i386.rpm~
+\end{lstlisting}
+
+\section{Replicación de datos} 
+Más allá de las diferentes alternativas para realizar la copia periódica de archivos, con una u otra herramienta, está el concepto de replicación de información. Su propósito es diferente del de la copia de resguardo. En lugar de proteger los datos, manteniendo una historia de copias a través del tiempo, la replicación busca aumentar la disponibilidad de los datos, manteniendo dos imágenes iguales en dos lugares de almacenamiento. 
+
+Esta forma de tratamiento de la información no protege de pérdidas o errores, pero facilita el rápido regreso a la operación de un sistema ante fallas de hardware. La replicación puede ser asimétrica (es decir, una copia es master y la segunda recibe las modificaciones), o simétrica (ambas copias reciben las modificaciones de la otra); y puede ser continua (disparada por eventos de filesystem) o administrativa (accionada por el administrador). El regreso a la operación de un sistema con fallos puede ser un proceso manual, como en el caso de clonar sobre \emph{bare metal} un sistema completo cuyo hardware ha quedado inutilizado, o automático, como en los clusters de Alta Disponibilidad.
+
+Herramientas que permiten ejecutar replicación, con diferentes alcances y objetivos, son los utilitarios rsync, csync2, unison (que utilizan el algoritmo de rsync), los sistemas de control de versiones como git o Subversion, filesystems distribuidos como Lustre o GlusterFS, los sistemas de almacenamiento en nube con clientes automáticos, como Dropbox o Owncloud, la clonación de máquinas virtuales, y el dispositivo de bloques replicado DRBD. 
+
+\subsection{Replicación con rsync}
+
+El comando rsync siguiente tomará las acciones necesarias para obtener una réplica del directorio /datos en el servidor backupserver, directorio /backups. La opción -a copiará todos los archivos en todos los subdirectorios del directorio origen que no existan en el directorio destino, o que hayan sido modificados, preservando los permisos; e ignorará todos aquellos archivos que sean iguales en ambos directorios. Además, la opción --delete borrará los archivos en el directorio destino que no existan en el origen. 
+
+\begin{lstlisting}
+rsync -aE --delete /datos backupserver.ejemplo.com.ar:/backups
+\end{lstlisting}
+
+\subsubsection{Modo \emph{dry-run}}
+
+Por supuesto, la opción –delete es peligrosa. Para verificar cuál será el efecto de un comando rsync antes de ejecutarlo, se puede utilizar la opción -n o su sinónimo –dry-run.
+
+\subsection{Replicación de particiones}
+
+Una extensión de la idea de backup es la de crear imágenes de particiones completas de un sistema, de modo de poder recuperarlo ante fallas generalizadas en menos tiempo y con menos trabajo que una reinstalación. Esta técnica es conveniente para aquellas particiones que alojan filesystems \quotes{de sistema}, es decir, donde los datos son mayormente binarios o archivos de configuración de sistema, que no son afectados por el trabajo cotidiano del usuario.
+
+\subsubsection{Comando dd}
+Una herramienta útil para el resguardo de particiones completas es el utilitario dd. Con él se puede obtener una imagen de una partición o dispositivo completo. 
+
+\begin{lstlisting}
+dd if=/dev/sda1 of=part1.dd; scp part1.dd serverbackup.ejemplo.com.ar:
+dd if=/dev/fd0 of=diskette.img
+\end{lstlisting}
+
+Un uso alternativo es el resguardo de las tablas de particiones:
+
+\begin{lstlisting}
+dd if=/dev/sda of=tpart.dd bs=1K count=1
+\end{lstlisting}
+
+Si se necesitara recuperar un conjunto de archivos de una imagen de una partición o dispositivo, puede hacerse montando la imagen sobre un directorio vacío, como si fuera un dispositivo físico. La opción de mount que permite esto es loop.
+
+\begin{lstlisting}
+mount -t vfat -o ro,loop /backups/partwin.img /mnt/rescate
+cp /mnt/rescate/* /datos
+\end{lstlisting}
+
+
+\subsubsection{Comando partimage}
+
+La réplica de particiones con dd, sin embargo, carece de flexibilidad. Los backups son del mismo tamaño que la partición, y son difíciles de manipular. Un utilitario tal como partimage tiene conocimiento del filesystem, copia solamente los bloques en uso del dispositivo, y opcionalmente aplica compresión. Además, puede dividir el resguardo en múltiples archivos para facilitar el almacenamiento. Puede ser usado en volúmenes de los diferentes sistemas de archivos de Linux, tanto como en FAT o NTFS. Tiene un modo interactivo y uno de línea de comandos.
+
+Tanto partimage como dd tienen limitaciones. No se puede recuperar un backup sobre una partición de tamaño menor que la original. En caso de ser sobre una de tamaño mayor, el espacio sobrante se desaprovecha, salvo que se redimensione el filesystem con una herramienta tal como resize2fs. No es sencillo recuperar selectivamente un conjunto de archivos de una imagen.
+
+\subsubsection{Comando netcat}
+
+El comando nc (o netcat) permite crear una conexión entre dos equipos a través de la red y utilizar entrada y salida standard para transferir información. Esto puede aprovecharse para la replicación de particiones de forma muy simple. El siguiente ejemplo utiliza el comando dd para crear un flujo de bytes directamente de una partición del equipo origen, que se desea replicar. 
+
+\begin{lstlisting}
+# en el host origen
+dd if=/dev/sda5 | nc 10.0.0.2 3000
+
+# en el host destino
+nc -l -p 3000 | dd of=/dev/sda3
+\end{lstlisting}
+
+El flujo de bytes es emitido por la salida standard del comando dd y entubado a la entrada del comando nc que se conecta con un servidor nc en el host destino. En este host se recibe el flujo a través de la conexión y se entuba a la entrada standard de dd, que lo vuelca en la partición destino. El resultado es una transferencia \emph{raw} de la partición, sin almacenamiento intermedio. En el ejemplo, el host origen tiene la dirección IP 10.0.0.1, y el destino, 10.0.0.2. El servidor nc en el destino atiende por el port 3000. La partición 5 del primer host se copia en la partición 3 del segundo, la que debe tener al menos el tamaño de la primera.
+
+\section{Temas de práctica}
+\begin{enumerate}
+	\item ¿Cómo determinar cuánto cambio hay en un filesystem? Diseñe un script que sea capaz de determinar qué archivos han sido modificados y cuánto ha crecido un filesystem entre dos fechas cualesquiera. Diseñe un script que sea capaz de presentar esta información en forma de tabla semanal. 
+	\item Utilizando rsync, ejecute una transferencia a través de la red, de un archivo de tamaño considerable. Anote el tiempo que registra el programa. Verifique las opciones de compresión que está utilizando su comando.
+	\item Repita la experiencia utilizando scp. Verifique las opciones de compresión de modo que la comparación sea justa. Puede usar el comando time para obtener el tiempo real de ejecución. Compare los tiempos. 
+	\item Repita una vez más la transferencia utilizando rsync, sin eliminar el archivo ya copiado en su lugar de destino. Repita con scp y compare los tiempos.
+	\item Prepare un directorio con uno o dos niveles de subdirectorios. Guarde archivos de tamaño considerable en esa estructura. Repita el experimento anterior con rsync y con scp, registrando tiempos. Luego modifique un único carácter de un único archivo de la jerarquía, repitiendo la transferencia con ambas herramientas y registrando tiempos.
+	\item Clasifique en simétrica/asimétrica, continua/administrativa, la replicación ejecutada por herramientas como rsync, csync2, unison, git, Subversion, Lustre, GlusterFS, Dropbox, Owncloud, la clonación de máquinas virtuales, y el dispositivo de bloques replicado DRBD. ¿De qué forma ayuda cada una a recuperar la operatividad de un equipo en caso de fallo?	
+	\item Cuando rsync utiliza ssh como transporte, se adapta a la política de autenticación de usuarios que utiliza ssh. ¿Cómo se puede evitar que rsync pida password de usuario para ejecutar una transferencia entre diferentes hosts?
+	\item Prepare un script para replicar un directorio junto con sus subdirectorios, usando rsync, en otro host. Instale el script en crontab. Verifique su funcionamiento modificando los contenidos del directorio.
+	\item Modifique el script anterior para utilizar el modo backup de rsync en lugar de replicar el directorio.
+	\item ¿De qué forma, y en qué casos, puede ser de ayuda la herramienta \lstinline$anacron$ en lugar de \lstinline$cron$? 
+	\item Utilice el comando partimage para obtener una imagen de una partición de su sistema. Aplíquela sobre otro disco. ¿Cómo se puede verificar que la replicación ha sido correcta? 
+\end{enumerate}

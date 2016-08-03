@@ -1,0 +1,292 @@
+\section{Introducción}
+Los contenidos acerca de ``Scripting Avanzado'' serán desarrollados de manera
+transversal a toda la materia. En tal sentido, se procederá al análisis y 
+modificación de scripts que hagan uso de las tecnologías vistas en los 
+restantes contenidos de la materia. 
+
+Por otra parte, haremos foco en las cuestiones de accesibilidad (ver \ref{ref:acces}). Acercando 
+el uso de scripts al usuario final (no administrador). 
+
+Con respecto a los contenidos desarrollados específicamente en este apunte, se asumen que el alumno aprobó el cursado de la materia correlativa ``Automatización y scripting''. En tal sentido, la ejercitación básica propuesta en \ref{ref:ejbasica}, debiera ser resuelta a modo de repaso. 
+
+\section {Contenidos}
+
+\begin{enumerate}
+\item Comandos básicos de archivos ls, cd, mkdir, cp, mv, rm, ln, patrones de nombres
+\item Redirección y piping, comandos head, tail, more, less, grep
+\item Variables, ambiente, aritmética
+\item Sentencias de control if, for, while, case
+\item Funciones
+\item Arreglos
+\item Expresiones regulares, uso de grep
+\item Uso de sort, diff, comm, uniq, cut
+\item Uso de cron
+\item Otros intérpretes: sed, awk, Perl
+\end{enumerate}
+
+\section{Ejercitación básica}\label{ref:ejbasica}
+
+\subsection{Redirección y piping}
+\begin{enumerate}
+	\item Crear un archivo conteniendo la salida del comando ls
+	\item Crear un archivo conteniendo la salida del comando ls -lR /tmp
+	\item Obtener las cinco primeras líneas del archivo anterior
+	\item Crear un archivo conteniendo las cinco primeras líneas y las cinco  últimas del archivo generado en 2
+	\item Crear un archivo conteniendo las primeras cinco líneas de la salida del comando ls -lR /tmp
+	\item Usando el anterior, crear un archivo conteniendo esas líneas, numeradas
+	\item Crear un archivo conteniendo las últimas cinco líneas de la salida del comando ls -lR /tmp
+\end{enumerate}
+
+
+\subsection {Variables, ambiente}
+\begin{enumerate}
+	\item Asignar e imprimir el contenido de dos variables
+	\item Asignar dos variables, imprimir sus valores, intercambiar sus valores, imprimirlos
+	\item Crear un script que imprima un valor que será pasado como argumento
+	\item Crear un script que imprima dos valores que serán pasados como argumento
+	\item Crear un script que imprima todos los valores que le sean pasados como argumento
+\end{enumerate}
+
+
+\subsection{Sentencias de control}
+\begin{enumerate}
+	\item 
+Imprimir cinco veces "Linux"
+	\item 
+Imprimir cinco veces el contenido de una variable
+	\item 
+Imprimir los números de 0 a 5
+	\item 
+Imprimir los dígitos de -1 a 6
+	\item 
+Imprimir los números de 0 a 99
+	\item 
+Imprimir junto al nombre de cada archivo en el directorio actual, su tamaño y su fecha de modificación
+	\item 
+Copiar los archivos terminados en .txt en archivos con igual nombre pero extensión .bak
+	\item 
+Renombrar los archivos con extensión .tex que comienzan en ASA reemplazando la partícula ASA con RII
+	\item 
+Para cada archivo modificado hace más de cinco días en un directorio, mostrar su cantidad de líneas
+	\item 
+Obtener mediante un cliente de HTTP una lista de archivos cuyos nombres están dados por  una expresión variable y controlada por un lazo
+	\item 
+De un conjunto de archivos tar, encontrar aquellas versiones de un archivo dado, contenido en ellos, que hayan sido modificadas entre dos fechas dadas.
+\end{enumerate}
+
+
+\subsection{Aritmética}
+\begin{lstlisting}
+$ declare -i num
+$ num="hola"
+$ echo $num
+	0
+$ num=5 + 5
+	bash: +: command not found
+$ num=5+5
+$ echo $num
+	10
+$ num=4*6
+$ echo $num
+	24
+$ num="4 * 6"
+$ echo $num
+	24
+$ num=6.5
+	bash: num: 6.5: syntax error in expression (remainder of expression is ".5")
+$ i=5; j=$i+1; echo $j
+$ i=5; let j=$i+1; echo $j
+$ let i=5
+$ let i=i+1
+$ echo $i
+	6
+$ let "i = i + 2"
+$ echo $i
+	8
+$ let "i+=1"
+$ echo $i
+	9
+$ i=3
+$ (( i+=4 ))
+$ echo $i
+	7
+$ (( i=i-2 ))
+$ echo $i
+	5
+$ let b=2#101; echo $b
+$ let h=16#ABCD; echo $h
+\end{lstlisting}
+
+\subsection{Arreglos}
+\begin{lstlisting}
+$ A=(1 2 3 cuatro cinco)
+$ echo ${!A[*]}
+0 1 2 3 4
+$ echo ${A[4]}
+cinco
+$ echo ${A[*]}
+1 2 3 cuatro cinco
+$ A[2]='banana'
+$ echo ${A[*]}
+1 2 banana cuatro cinco
+\end{lstlisting}
+
+\subsection{Arreglos asociativos}
+\begin{lstlisting}
+$ declare -A B
+$ B=([francia]='paris' [espana]='madrid' [argentina]='buenos aires')
+$ echo ${!B[*]}
+espana argentina francia
+$ echo ${B[*]}
+madrid buenos aires paris
+$ echo ${B[francia]}
+paris
+\end{lstlisting}
+
+
+\subsection{Here-Documents}
+\begin{lstlisting}
+$ cat > texto.txt << END
+> Hola
+> Probando...
+> END
+$ cat texto.txt
+\end{lstlisting}
+
+\subsection{Traps}
+\begin{lstlisting}
+# man 7 signal
+# 1 = SIGHUP (Hangup of controlling terminal or death of parent)
+# 2 = SIGINT (Interrupted by the keyboard)
+# 3 = SIGQUIT (Quit signal from keyboard)
+# 6 = SIGABRT (Aborted by abort(3))
+# 9 = SIGKILL (Sent a kill command)
+
+trap limpieza 1 2 3 6 9
+function limpieza
+{
+	echo "Recibimos senal - desmantelando..."
+	rm -f ${tempfiles}
+	echo Finalizando
+}
+\end{lstlisting}
+
+
+
+\section{Casos de uso}
+
+
+\subsection{Investigar el sistema}
+\begin{enumerate}
+	\item 
+Modificar la salida del comando blkid para conocer el UUID, el nombre y tipo, y punto de montado, de cada dispositivo de bloques del sistema.
+	\item 
+Analizar archivos de log buscando conocimiento: duración de sesiones ssh por usuario, mensajes de mail entre usuarios, con histograma por tamaños, etc. (ver iptables.log, \ref{sec:iptables.log})
+	\item 
+Detectar momentos en que la salida de vmstat muestra picos de I/O, procesos corriendo, procesos en espera, uso de swap, etc.
+\end{enumerate}
+
+
+\subsection{Recuperar espacio de almacenamiento}
+\begin{enumerate}
+	\item Encontrar los diez archivos más grandes en un directorio y sus hijos, imprimirlos junto con su tamaño de mayor a menor.
+	\item Encontrar los diez archivos más grandes en un directorio y sus hijos, moverlos a otro directorio (en otro filesystem).
+	\item Encontrar los diez archivos más grandes del sistema, imprimir el nombre de usuario dueño.
+	\item Agregar al script anterior el envío de notificación por mail al usuario responsable.
+		\item 
+Encontrar archivos en directorios de usuario con la cadena \quotes{cache} en su nombre e imprimir el uso de disco de cada uno.
+	\item 
+Idem, enviando nombres a un archivo y usándolo como lista para borrarlos, comprimirlos o moverlos.
+
+\end{enumerate}
+
+
+
+\subsection{Networking}
+\begin{enumerate}
+	\item 
+Disparar un aviso cuando se pierde la conectividad a un conjunto dado de nodos de la red.
+	\item 
+Analizar la salida del comando netstat para descubrir en qué momento aparece un nuevo port abierto y a qué aplicación corresponde.
+	\item 
+Obtener un log de tráfico y obtener orígenes máximos y mínimos de tráfico, cantidades totales de bytes traficados por interfaz, etc.
+	\item 
+Recoger estadísticas de espacio en disco, cantidad de procesos, carga de CPU, en diferentes nodos de la red, y centralizarlos en un nodo monitor que presente los resultados.
+\end{enumerate}
+
+\subsection{Seguridad}
+\begin{enumerate}
+	\item 
+Detener el script si la identidad del proceso corresponde a root.
+	\item 
+Solicitar información confidencial (como claves) con video inhibido.
+	\item 
+Capturar señales para impedir la interrupción del script por BREAK o fallos de ejecución.
+	\item 
+Utilizar MD5/SHAx para confirmar integridad de archivos.
+\end{enumerate}
+
+
+
+
+\subsection{Tratamiento de datos}
+\begin{enumerate}
+	\item 
+Revisar el uso de los comandos cut, join, sort, uniq, comm.
+	\item 
+Crear script que administra una base de datos en formato CSV.
+	\item 
+Dado un archivo con una lista de direcciones IP, adjuntarles la resolución inversa de nombres correspondiente.
+	\item 
+Crear un histograma de accesos por nombre de dominio, a partir de los paquetes registrados en un archivo de log generado por iptables. 
+	\item 
+Dada una base de datos CSV implementar búsqueda por expresiones regulares.
+	\item 
+Dada una base de datos CSV implementar proyección sobre un conjunto de campos dados.
+	\item 
+Convertir un listado de individuos PDF en archivo CSV.
+	\item 
+Preparar un conjunto de scripts con un único punto de entrada para el administrador. Estos scripts mantendrán un conjunto de bases de datos en formato CSV:
+\begin{lstlisting}
+alumnos: UID, Username, Apellido, Nombres, NoLegajo, Activo
+materias: MID, Nombre, Carrera, Docente
+cursadas: UID, MID, Ano, Cuatrimestre
+\end{lstlisting}
+El dato Activo es booleano. Con estas bases de datos:
+\begin{itemize}
+	\item 
+Listar todas las materias asignadas a un mismo docente.
+	\item 
+Listar todas las materias cursadas por un alumno.
+	\item 
+Listar todos los alumnos activos inscriptos en una materia.
+	\item 
+Listar todos los alumnos que cursan una misma carrera dada durante un año dado.
+	\item 
+Listar todos los alumnos, agrupados por materia cursada, dentro de cada año. 
+	\item 
+Listar todos los alumnos de un mismo docente.
+	\item 
+Dado un alumno por su legajo, consultar su estado Activo/Inactivo.
+	\item 
+Para aquellos alumnos que hace más de tres años que no se inscriben en ninguna cursada, pasar su dato Activo a falso (Inactivo).
+	\item 
+Generar un par de archivos en el formato de /etc/passwd y /etc/shadow para todos los alumnos activos.
+	\item 
+Generar un directorio /home/usuario para cada alumno activo, con UID correspondiente.
+\end{itemize}
+\end{enumerate}
+
+
+\section{Accesibilidad para usuarios finales}\label{ref:acces}
+\subsection{Ejercitación propuesta}
+\begin{enumerate}
+	\item 
+Preparar un script con interfaz gráfica para copiar archivos seleccionados a una carpeta preestablecida con el fin de obtener un backup periódico de todos sus contenidos.
+	\item 
+Preparar un script con interfaz gráfica que presente los cinco directorios con mayor ocupación de almacenamiento dentro del home del usuario.
+	\item 
+Preparar un script con interfaz gráfica que permita escalar en un 50% el 
+tamaño de un conjunto de imágenes seleccionadas en un navegador de archivos
+a su elección. 
+\end{enumerate}

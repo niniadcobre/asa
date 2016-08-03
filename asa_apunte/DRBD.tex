@@ -1,0 +1,332 @@
+\section{DRBD}
+% Conceptos
+% Las aplicaciones que funcionan sobre el cluster necesitan disponer de una visión consistente del almacenamiento. La aplicación, al migrar de nodo durante el proceso de failover, debe encontrar el mismo estado persistente en el otro nodo.
+% Las soluciones a este problema se implementan, o bien con almacenamiento compartido (NAS, SAN) o con almacenamiento replicado. Esta última forma, en general, es menos costosa y no introduce nuevos puntos de falla. La latencia y periodicidad de la replicación determinan la calidad de la solución de Alta Disponibilidad.
+
+DRBD (Distributed Replicated Block Device) es una tecnología implementada a nivel del kernel Linux que efectúa una replicación \textbf{automática, continua y asimétrica}, de bloques de disco. El modo de operación de DRBD es semejante a un conjunto RAID 1 donde ambos discos estuvieran en diferentes hosts de la red  (Fig. \ref{fig:drbd}). 
+
+\figura{drbd}{Localización de DRBD en el stack de I/O}{drbd.pdf}
+ 
+El driver DRBD está incorporado al kernel Linux desde la versión 2.6.33. Se ubica lógicamente entre la cache de bloques del kernel y el almacenamiento físico, ofreciendo a los procesos usuarios la interfaz de un dispositivo de bloques. El usuario normalmente utiliza este dispositivo para, por ejemplo, crear un filesystem sobre él. 
+
+Para configurar un dispositivo DRBD debe dársele un soporte, es decir, un dispositivo de bloques subyacente que le provea almacenamiento (tal como una partición o un volumen lógico), y un canal de comunicación con su nodo \textit{peer}.
+ 
+En su configuración más habitual, DRBD impone roles primario y secundario a los nodos que intervienen. En este modo, únicamente las aplicaciones corriendo en el nodo primario pueden utilizar el espacio de almacenamiento ofrecido por el dispositivo DRBD. En particular, solamente el primario puede montar ese dispositivo\footnote{En realidad, es posible una configuración de doble primario; pero para poder hacer accesos concurrentes en forma segura, las aplicaciones que vayan a usar ese almacenamiento necesitan contar con un \textbf{lock manager distribuido}, que sólo está presente en los filesystems de cluster como GFS2, GlusterFS u OCFS2.}.
+
+\subsection{Forma de operación}
+\begin{itemize}
+	\item Toda actividad de lectura o escritura sobre el dispositivo soporte (creación de filesystem, escritura de bloques de datos, borrado de archivos, etc.) pasa por el control del módulo DRBD. 	
+	\item Cada modificación, antes de ser efectivizada en el nodo primario, es comunicada al módulo \textit{peer} secundario. 	
+	\item Éste graba el bloque modificado en su soporte local y confirma la grabación. 	
+	\item Recibida la confirmación, el nodo primario graba su copia del bloque en su propio soporte local. 
+\end{itemize} 
+
+
+Ante un evento de caída de uno u otro de los nodos, cuando se recupera el nodo perdido, ocurre una resincronización automática. Cuando el nodo primario cae y se recupera, puede volver a ese rol o no, dependiendo de una opción de configuración. El vínculo por el cual circulan los datos de bloques que deben actualizarse en el secundario, y por donde se realizan las sincronizaciones, es una conexión de red  preferiblemente dedicada y diferente de la red de servicio, y de la mayor velocidad posible. Puede funcionar tanto en LAN como en WAN, utilizando diferentes protocolos de replicación para favorecer la performance en caso de alta latencia (como en WAN) o maximizar la expectativa de consistencia (en caso de LAN). 
+
+DRBD en su versión actual está restringido a un conjunto de dos nodos. Por lo tanto, los clusters de Alta Disponibilidad con almacenamiento replicado basado en DRBD tienen exactamente dos nodos (aunque cada nodo puede tener configurados diferentes recursos DRBD y pertenecer a varios clusters, o los recursos pueden ser \textit{apilados (stacked)}). 
+
+\subsection{Recursos DRBD}
+Un recurso (\textit{resource}) DRBD es un conjunto replicado de unidades de almacenamiento. Puede alojar uno o múltiples volúmenes (\textit{volume}). Cada volumen dentro de un recurso puede tener algunos atributos propios y diferentes de los demás en el mismo recurso. Cada volumen DRBD necesita un espacio de almacenamiento propio, y ofrecerá un dispositivo de bloques independiente. La administración de DRBD se realiza al nivel de recursos.
+    
+% Se deberá especificar en la configuración el estado normal de asignación de recursos a los nodos; es decir, se debe definir qué nodo será responsable habitualmente de cada recurso. En un cluster activo-standby, la decisión es simplemente definir qué nodo será el primario y cuál el secundario.
+
+
+
+% \subsection{Particionamiento}
+% Debe especificarse cuál será el almacenamiento para cada grupo de recursos que vaya a ser servido por el cluster. Durante la instalación se deben crear y reservar, para cada grupo de recursos, dos particiones, una de al menos 128MB (para los metadatos), y la otra será dimensionada de acuerdo al consumo de espacio en disco que haga el grupo de servicios que se pretende instalar. 
+% 
+
+
+\subsection{Configuración de DRBD}
+
+La configuración de DRBD puede alojarse en /etc/drbd.conf con la descripción de los recursos, o bien se pueden crear archivos de configuración independientes para cada recurso (dentro de \code{/etc/drbd.d/}, con la extensión \code{.res}). En \code{/usr/share/doc/drbd84-utils-8.9.1/drbd.conf.example} se encuentra un ejemplo bastante complejo de configuración con varios recursos (ver Apéndice \ref{sec:confdrbd}). 
+\\
+
+\recuadro{La configuración de DRBD debe ser \textbf{idéntica en ambos nodos}. Sin embargo, no hay restricciones sobre los nombres o tipos de los dispositivos de soporte. Un volumen puede estar soportado por particiones de nombre diferente, por una partición en un nodo y por un LV en el otro, etc.}
+
+
+
+\subsubsection{Ejemplos de configuración}
+
+\begin{itemize}
+	\item Un recurso con un único volumen. En ambos hosts, el almacenamiento es idéntico (se utilizan particiones con el mismo nombre en ambos nodos).
+\begin{lstlisting}
+resource drbd0 {
+	device /dev/drbd0;
+	disk /dev/sdc2;
+	meta-disk internal;
+	on nodo1 {
+		address 10.0.16.12:7780;
+	}
+	on nodo2 {
+		address 10.0.16.13:7780;
+	}
+}
+\end{lstlisting}
+
+\item Un recurso con dos volúmenes, con almacenamiento en volúmenes lógicos llamados lv0 y lv1 respectivamente. En ambos nodos, los nombres de los LV son idénticos. Cada volumen recibe un nombre de dispositivo propio (parámetro \code{device}).
+
+\begin{lstlisting}
+resource drbd0 {
+	net {
+		protocol A;
+	}
+	volume 0 {
+		device /dev/drbd0;
+		disk /dev/vgdrbd/lv0;
+		meta-disk internal;
+	}
+	volume 1 {
+		device /dev/drbd1;
+		disk /dev/vgdrbd/lv1;
+		meta-disk internal;
+	}
+	on nodo1 {
+		address	192.168.47.1:7780;
+	}
+	on nodo2 {
+		address	192.168.47.2:7780;
+	}
+}
+\end{lstlisting}
+\item Una configuración con un único volumen pero donde los nombres de las particiones de soporte no son iguales en ambos nodos.
+\begin{lstlisting}
+resource drbd0 {
+	on nodo1 {
+		device /dev/drbd0;
+		disk /dev/sdc1;
+        meta-disk internal;
+		address 10.0.16.17:7780;
+	}
+	on nodo2 {
+		device /dev/drbd0;
+        disk /dev/sdb2;
+        meta-disk internal;
+		address 10.0.16.16:7780;
+	}
+}
+\end{lstlisting}
+\end{itemize}
+\subsubsection{Parámetros de configuración}
+Discutiremos algunos parámetros importantes de la configuración.
+\begin{description}
+	\item [Dispositivo (device)] Es el nombre con el que se manejará el volumen usando los comandos administrativos.
+	\item [Disco (disk)] Es el nombre de dispositivo usual del almacenamiento para ese volumen. 
+	\item [Recursos y volúmenes (resource, volume)] La unidad de replicación y de administración es el recurso, que puede ser dividido en volúmenes que se utilizan independientemente. 
+% 	En una instalación pueden definirse uno o más grupos de volúmenes. Si los volúmenes están situados sobre el mismo disco, se deseará que la sincronización de cada uno con su par no se opere concurrentemente (lo cual aumentaría el movimiento de las cabezas del disco debido a los múltiples accesos y afectaría negativamente la performance). En su lugar se prefiere que las sincronizaciones pendientes se realicen secuencialmente, y esto se define mediante los parámetros group para cada recurso. Los recursos situados en un mismo grupo se actualizarán concurrentemente, y los de grupos diferentes lo harán secuencialmente. Si solamente se tiene un grupo de recursos, este parámetro no reviste importancia.
+% 
+
+% %TODO Syncer
+% 	\item [Syncer] Es posible especificar la tasa máxima de utilización del vínculo de la red privada durante las sincronizaciones con el parámetro rate. Como las sincronizaciones pueden tener lugar en forma concurrente con la replicación, la estrategia de imponer un máximo a las sincronizaciones favorece la performance de las aplicaciones, que se verían demoradas si la replicación tuviera una latencia exagerada.
+% 
+	\item [Direcciones (address)] Se especificarán las direcciones de cada nodo sobre la red privada, dedicada a la replicación. La política de firewalling debe permitir la conexión entre los nodos mediante los ports declarados en la configuración. Como normalmente se trata de una red dedicada, suele ser conveniente desactivar completamente el firewall sobre esta red.
+
+	\item [Metadatos (meta-disk)] 
+
+	Los metadatos mantenidos por DRBD durante la operación incluyen datos vitales para la integridad del volumen y su recuperación. El parámetro de configuración DRBD correspondiente se llama \textit{meta-disk}. Pueden ser alojados de dos maneras:
+
+\begin{enumerate}
+	\item En los últimos sectores del mismo soporte del almacenamiento (opción llamada \textit{meta-disk internal})
+	\item Usando un soporte separado (como, por ejemplo, \textit{meta-disk /dev/sdbX}). 
+\end{enumerate}
+
+La ventaja de la primera opción es una más fácil administrabilidad, ya que los metadatos acompañan a los datos cada vez que se recuperan. La ventaja de la segunda opción puede explotarse si se trata de particiones o volúmenes en discos separados, en cuyo caso la performance puede ser mejor que si datos y metadatos comparten un disco. En caso de altos niveles de actividad los metadatos pueden convertirse en un cuello de botella, y con la segunda opción esto puede evitarse. 
+
+Si se desea instalar DRBD para replicar un volumen de datos preexistente, la primera opción implica riesgo de corrupción de los datos, a menos que se reduzca el filesystem o se extienda el volumen. En cualquier otro caso, por simplicidad, la opción más recomendada es \textit{meta-disk internal}.
+
+\item [Nombres de nodo (on)]
+En la configuración aparecen los nombres de nodo arbitrarios \textit{nodo1} y \textit{nodo2}. Los nombres de los nodos son vitales tanto para que el software de dispositivos replicados interprete su configuración, como a los efectos de que los nodos puedan identificarse ante un manejador de pertenencia al cluster. Deben satisfacerse algunas condiciones indispensables sobre los nombres para lograr la conexión entre peers. 
+
+\begin{enumerate}
+	\item Ambos peers deben responder al comando \code{uname -n} con esos respectivos nombres.  Para esto se puede usar temporariamente el comando \code{hostname}, pero la configuración persistente depende de la distribución\footnote{En CentOS se consigue configurando \code{HOSTNAME=nombre} en \code{/etc/sysconfig/network}.}.
+	\item Cada peer debe poder efectuar la resolución de la dirección del otro por su nombre. Se puede utilizar un servidor DNS, pero es suficiente con modificar la configuración del resolver local (\code{/etc/hosts}).
+\end{enumerate}
+
+\item [Protocolos (protocol)]
+Dependiendo de las características de la red, es posible configurar el dispositivo replicado para que las operaciones de escritura sean confirmadas al llegar al otro nodo (protocolo A), al ingresar en la cache del sistema de E/S del otro nodo (protocolo B), o al ser grabadas físicamente (protocolo C). En redes locales se elige normalmente el protocolo de replicación C, que es el de mejor integridad de datos, ya que considera efectuada la operación de write solamente cuando el nodo remoto acusa haber grabado físicamente un sector replicado. En redes con alta latencia, en cambio, se preferiría el protocolo A.
+
+La configuración por defecto del protocolo (C) se encuentra en el archivo de configuración global.
+
+
+\end{description}
+
+\tabla{drbdcomandos}{Comandos de administración de DRBD}{c|l}{
+\code{drbdadm cstate} & Listar estado de conexiones \\
+\code{drbdadm dstate} & Listar estado de datos \\
+\code{drbdadm up} & Activar recurso\\
+\code{drbdadm up all} & Activar todo\\
+\code{drbdadm down all} & Desactivar todos los recursos\\
+\code{drbdadm primary} & Asumir el rol primario sobre un recurso \\
+\code{drbd-overview} & Estado de conexiones y recursos \\
+\code{cat /proc/drbd} & Monitorear estado de dispositivos
+}
+
+\subsection{Ejecución de DRBD}
+Una vez creada la configuración, para la inicialización, puesta en marcha y administración de DRBD se recurre principalmente al comando \code{drbdadm} con sus subcomandos (Cuadro \ref{tab:drbdcomandos}). 
+
+\subsubsection{Inicializar el dispositivo}
+Esta operación crea en el soporte los metadatos para la replicación. 
+\begin{lstlisting}
+drbdadm create-md <recurso>
+\end{lstlisting}
+
+\subsubsection{Activar el recurso}
+\begin{lstlisting}
+drbdadm up <recurso>
+\end{lstlisting}
+
+\subsubsection{Establecer roles}
+Una vez configurado un recurso y activado por primera vez el dispositivo DRBD, los peers se comunican pero no pueden decidir por sí solos  cuál de los dos será el primario. El administrador debe imponer los roles con una opción especial del comando drbdadm. Esta opción varía según las versiones de DRBD. 
+% En DRBD 0.7.X, el rol para el recurso r0 se define con el comando \code{drbdadm -- --do-what-I-say primary r0}
+% en el peer que vaya a ser primario. 
+En DRBD 8.4 en adelante, el rol primario se define \textbf{únicamente en el nodo que vaya a cumplir el rol primario} dando el comando \code{drbdadm primary --force <recurso>}. Esta novedad se comunica automáticamente al otro peer que se asumirá como secundario y quedará replicando.
+
+
+
+\subsection{Uso del dispositivo}
+
+\subsubsection{Creación de filesystems}
+Una vez puesto en marcha exitosamente un dispositivo, ya puede ser utilizado (\textbf{en el primario}) aunque los peers no hayan acabado la sincronización. Normalmente se creará un filesystem sobre cada volumen DRBD. Por defecto, \texttt{mkfs} aprovechará todo el espacio en el volumen. 
+
+\begin{lstlisting}
+mkfs -t ext4 /dev/drbd0
+\end{lstlisting}
+
+
+\recuadro{Notar que el dispositivo donde se crea el filesystem es el especificado como \code{device} en la configuración. Los volúmenes o particiones subyacentes \textbf{no deben volver a accederse} mientras esté activo el dispositivo, ya que son de uso exclusivo del driver DRBD.}
+\\ 
+ 
+Cada filesystem debe ser creado, no sobre el dispositivo de bloques soporte (la partición del disco \texttt{/dev/sdaX}, el dispositivo RAID \texttt{/dev/mdX}, el volumen \texttt{/dev/vgX/lvX}, etc.), sino sobre el dispositivo replicado \texttt{/dev/drbd0, /dev/drbd1}, etc., correspondiente, que existe una vez que se ha inicializado el recurso drbd. DRBD además ofrece un directorio \code{/dev/drbd/by-res} donde aparecen subdirectorios por cada recurso y pseudoarchivos por cada volumen. Alternativamente, se puede usar esa nomenclatura. 
+
+\subsubsection{Tuning del filesystem}
+Normalmente un filesystem tiene definido un intervalo de tiempo entre filesystem checks y la cantidad máxima de veces que se montará el filesystem sin ser chequeado. Cada vez que sea montado el filesystem, el sistema verificará estas condiciones y eventualmente lanzará un chequeo que puede aumentar la latencia de la puesta en servicio del nodo. Al crear el filesystem sobre el dispositivo DRBD correspondiente (con el utilitario mkfs), puede ser de interés redefinir estos parámetros con el utilitario \code{tune2fs}. Los argumentos \texttt{-c0} y \texttt{-i0} eliminan esos controles. 
+
+\begin{lstlisting}
+tune2fs -c 0 -i 0 /dev/drbd0
+\end{lstlisting}
+
+\subsubsection{Montado de los recursos}
+En cada nodo se necesitará preparar líneas en \texttt{/etc/fstab} para permitir el montado de los dispositivos de DRBD. Sin embargo, estos dispositivos \textbf{no deben ser montados automáticamente} (opción \code{noauto}) ya que es el servicio de \textit{cluster resource manager} quien debe manejar su montado y desmontado en función del rol del nodo dentro del cluster en cada momento.
+
+\begin{lstlisting}
+/dev/drbd0    /public        ext3       defaults,noauto       0 0
+\end{lstlisting}
+
+\subsubsection{Failover manual}
+En ausencia de un gestor de recursos de cluster, y ante cualquier evento de fallo (o para realizar alguna tarea administrativa), para transferir el rol primario al otro nodo se deben seguir pasos en cierto orden. 
+
+\begin{enumerate}
+	\item En el primario, si está activo, detener las aplicaciones que usen el recurso y desmontarlo.
+	\item Degradarlo administrativamente al rol secundario. Momentáneamente ambos nodos quedarán en rol secundario.
+	\item Promover el otro nodo a primario.
+	\item Montar el recurso en el nuevo primario.
+	\begin{lstlisting}
+umount /dev/drbd/by-res/<recurso>
+drbdadm secondary <recurso>
+drbdadm primary <recurso>
+mount /dev/drbd/by-res/<recurso> <punto de montado>
+\end{lstlisting}
+
+\end{enumerate}
+
+
+\subsection{Monitoreo de DRBD}
+
+El estado de los recursos se visualiza rápidamente con \code{drbd-overview}.
+
+\begin{lstlisting}
+# drbd-overview 
+ 0:drbd0/0  Connected Primary/Secondary UpToDate/UpToDate /r0 ext4 19G 173M 18G 1% 
+ 1:drbd0/1  Connected Primary/Secondary UpToDate/UpToDate /r1 ext4 13G 161M 12G 2% 
+\end{lstlisting}
+
+La información de estado de DRBD incluye una terna de rótulos \textit{(cs, ro, ds)} con varios posibles valores:
+
+\begin{description}
+	\item[Connection status (cs)] Indica si ambos nodos están conectados. Los valores posibles pueden indicar estados de esperando conexión, desconectado, en proceso de sincronización, etc. El valor para el estado correcto operativo es \textit{Connected}. 
+
+	\item[Role (ro)] Es un par de valores que indican los roles asumidos por ambos nodos en un momento dado. El primer valor corresponde al nodo donde se da el comando, y el segundo al nodo restante. Los valores para el estado correcto operativo son \textit{Primary/Secondary} (cuando el comando se da en el nodo primario) o \textit{Secondary/Primary} (cuando se da en el nodo secundario).
+
+	\item[Disk Status (ds)] Es un valor que indica si los contenidos del almacenamiento de ambos nodos están sincronizados. El primer valor corresponde al nodo donde se da el comando, y el segundo al nodo restante. El valor correcto operativo es \textit{UpToDate} para ambos nodos.
+ 
+\end{description}
+
+Valores diferentes de los correctos operativos, no necesariamente indican un error, sino que puede tratarse de una condición transitoria. Inicialmente los dispositivos atravesarán estados de no conectado, inconsistente, desconocido, etc., hasta que se comuniquen los peers y comiencen a sincronizar sus contenidos. Otro tanto ocurre durante la recuperación del cluster al volver del modo degradado. 
+
+Eventualmente, las ternas de estado de DRBD en ambos nodos deben alcanzar respectivamente los valores (\textit{Connected, Primary/Secondary, UpToDate/UpToDate}) y (\textit{Connected, Secondary/Primary, UpToDate/UpToDate}).
+
+
+Para vigilar la actividad de DRBD puede observarse el pseudoarchivo \code{/proc/drbd}. Con el comando \code{watch cat /proc/drbd} se puede visualizar constantemente el estado de los recursos. El resto de los datos que aparecen en la salida corresponde a niveles de performance e historia de actividad. 
+
+
+\begin{itemize}
+	\item Primario, con ambos recursos sincronizados
+	\begin{lstlisting}
+ 0: cs:Connected ro:Primary/Secondary ds:UpToDate/UpToDate A r-----
+    ns:5066100 nr:0 dw:0 dr:5066764 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:0
+ 1: cs:Connected ro:Primary/Secondary ds:UpToDate/UpToDate A r-----
+    ns:0 nr:0 dw:0 dr:664 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:0
+	\end{lstlisting}
+	\item Secundario, esperando conexión 
+\begin{lstlisting}
+ 0: cs:WFConnection ro:Secondary/Unknown ds:Inconsistent/DUnknown C r----s
+    ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:20127092
+ 1: cs:WFConnection ro:Secondary/Unknown ds:Inconsistent/DUnknown C r----s
+    ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:13422144
+\end{lstlisting}
+	\item Secundario sincronizando el volumen 0 y habiendo sincronizado el volumen 1
+\begin{lstlisting}
+ 0: cs:SyncTarget ro:Secondary/Primary ds:Inconsistent/UpToDate A r-----
+    ns:0 nr:4030816 dw:4030816 dr:0 al:0 bm:0 lo:1 pe:7 ua:0 ap:0 ep:1 wo:f oos:1035284
+	[==============>.....] sync'ed: 79.7% (1008/4944)M
+	finish: 0:03:21 speed: 5,124 (5,380) want: 7,600 K/sec
+ 1: cs:Connected ro:Secondary/Primary ds:UpToDate/UpToDate A r-----
+    ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:0
+\end{lstlisting}
+	\item Secundario con ambos recursos sincronizados
+	\begin{lstlisting}
+ 0: cs:Connected ro:Secondary/Primary ds:UpToDate/UpToDate A r-----
+    ns:0 nr:5066100 dw:5066100 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:0
+ 1: cs:Connected ro:Secondary/Primary ds:UpToDate/UpToDate A r-----
+    ns:0 nr:0 dw:0 dr:0 al:0 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:0
+	\end{lstlisting}
+\end{itemize}
+
+
+
+
+
+
+\subsection{Restricciones importantes}
+\begin{itemize}
+	\item Bajo ningún concepto debe montarse un filesystem soportado por DRBD v.0.7.X en un nodo mientras su rol de DRBD es secundario, ni siquiera en modo read-only. El acceso simultáneo es causa de corrupción de datos. 
+	\item La restricción anterior deja de tener efecto a partir de la versión 8.X, que es capaz de funcionar con ambos nodos en rol primario. Sin embargo, su uso práctico no es trivial porque requiere 1) un filesystem de cluster y 2) aplicaciones tolerantes al acceso múltiple.
+\end{itemize} 
+
+
+\subsection{Referencias}
+
+\begin{itemize}
+	\item \url{http://www.drbd.org/users-guide-8.4/drbd-users-guide.html}
+\end{itemize}
+
+
+\subsection{Notas de instalación}
+En la familia RedHat/CentOS es necesaria la instalación previa de un repositorio adicional. Actualmente están disponibles paquetes para dos versiones diferentes de DRBD. 
+\begin{lstlisting}
+rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
+yum install drbd84-utils.x86_64 kmod-drbd84.x86_64
+\end{lstlisting} 
+
+\subsection{Temas de práctica}
+\begin{enumerate}
+	\item Prepare dos equipos en las condiciones necesarias para formar parte de un cluster de almacenamiento replicado DRBD (nombres de nodos, direcciones secundarias, resolución de nombres, partición libre en un disco, recurso DRBD, /etc/fstab, punto de montado). Busque la configuración DRBD más simple posible, con un único volumen. Luego de activar el recurso, cree un filesystem sobre él y observe la sincronización mientras ocurre. Monte y utilice el filesystem. Observe la conducta del nodo peer cuando se baja administrativamente el recurso, cuando se baja el nodo primario, cuando se simula una caída del sistema primario, cuando se migra administrativamente el rol primario. Intente acceder a los archivos creados en el otro nodo. ¿Qué ocurre al recuperarse el nodo anteriormente perdido? Tenga en cuenta que, en este ejercicio, las acciones de montar y desmontar los filesystems son manuales.
+	\item Idem anterior, pero creando un LV sobre el recurso DRBD.   
+	\item Investigue la opción de configuración \textit{dual-primary} de DRBD. Con esta opción, ¿qué ocurrirá si se monta el recurso en ambos nodos, sin contar con un filesystem de cluster? ¿Qué ocurrirá si se interrumpe la comunicación por la red entre los nodos?
+	\item En un cluster \textit{dual-primary}, ¿puede utilizar el mecanismo de snapshots de LVM para acceder a los contenidos del LV desde el otro nodo sin migrar el primario?  
+	\item Discuta qué mecanismos serían necesarios para que las operaciones de asumir el rol primario, y montar/desmontar los recursos DRBD, fueran automáticas, y cómo se podrían implementar. 
+	\item La robustez del sistema DRBD depende de la estabilidad de las comunicaciones a través de la red. Investigue sobre el fenómeno de \textit{split brain}, qué significa, sus causas, su gravedad, y las formas de resolverlo.
+	\item ¿Cómo se puede producir una situación de \textit{split brain} en el cluster de práctica? ¿Cuál es la conducta del sistema ante este evento?
+\end{enumerate}

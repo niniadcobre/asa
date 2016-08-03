@@ -1,0 +1,101 @@
+\section {Clustering}
+
+Una arquitectura típica de Alta Disponibilidad es el cluster de HA (\textit{High Availability Cluster, HAC}), donde dos o más nodos en una red ofrecen servicios en forma redundante. El HAC protege a los servicios de los fallos del nodo que los soporta.
+
+Este tipo de cluster no debe confundirse con los clusters de Computación de Altas Prestaciones (\textit{High Performance Computing, HPC}) cuyo objetivo es lograr alta capacidad de procesamiento dividiendo la ejecución de una tarea en varios procesadores, ni con los clusters de Balance de Carga, o Servidores Virtuales, donde simultáneamente se brinda el mismo servicio pero distribuyéndolo sobre varios nodos.
+
+Existen diferentes configuraciones, pero la más sencilla es la del cluster de dos nodos, donde uno es el servidor activo o primario de un servicio, y el otro está normalmente en estado pasivo, secundario o \textit{standby}. La función del secundario, durante la operación normal, es la monitorización del primario para detectar sus caídas o fallas y tomar el control de los servicios.
+
+El proceso de migración de un servicio de un nodo a otro se llama \textit{failover}. La acción de asumir el rol de primario para un servicio desde la situación de standby se llama \textit{takeover}. Cuando un sistema pierde la característica de ser redundante, por fallo de todas las instancias menos una, se dice que trabaja en \textit{modo degradad}o (momento en que se hace crítica la puesta en servicio de las demás instancias).
+
+Los servicios protegidos por el HAC pueden ser varios de entre los normalmente brindados por un nodo, como WWW, mail, LDAP, NFS, NIS, DHCP, SMB/CIFS, proxy/firewall, etc. y por supuesto el almacenamiento compartido o replicado. En particular existe un recurso sujeto a failover que es una dirección IP especial, de propiedad del cluster (\textit{Virtual IP, VIP}). Es la dirección por donde se ofrecen los servicios protegidos. Esta dirección migra convenientemente al nodo que detente el rol primario en cada momento.
+
+La decisión de si los servicios de un nodo, mientras su rol es secundario, están o no corriendo, y en tal caso, en qué modo, es una cuestión de diseño del HAC. Dependiendo de la implementación del servicio, puede ser suficiente el modo \textit{cold standby} (los procesos servidores no están ejecutándose) o el modo \textit{warm standby} (los servidores están ejecutándose pero sin dar servicio). Este último modo tiene una penalidad menor en tiempo de arranque de los servicios al momento del failover.
+
+Un nodo puede ser a la vez primario para algunos servicios y secundario para otros, aunque en general no aporta nada a la solución del problema de disponibilidad el hecho de distribuir los servicios (si los equipos no son capaces de soportar la carga durante la caída del primario, no lograremos aumentar la disponibilidad de todos modos). En cambio, tiene sentido la distribución de servicios cuando además se pretende balance de carga, aunque entonces no se habla con propiedad de nodos en primario/standby, ni de takeover.
+
+En general, las aplicaciones responsables de ofrecer los servicios deben compartir alguna cantidad de información de estado o de configuración, disponible a todos los nodos del cluster, para lo cual se agrega un almacenamiento compartido o replicado. Si existe una sola instancia, compartida, de almacenamiento (p. ej. mediante NFS, o mediante una única unidad de almacenamiento \textit{multihomed}), se introducirá un SPOF. La alternativa es la replicación del almacenamiento, que dependiendo de los objetivos del sistema HA puede hacerse en varias formas y modos. 
+
+La replicación puede realizarse a nivel de bloques (donde se interpone un módulo de software especial en el camino de I/O de los datos hacia el disco), de filesystem, o de archivos. Este último caso sería el de la replicación ejecutada por el administrador de sistemas a nivel de aplicación (con utilitarios como rsync o similares). 
+% Según el modo de operación, cada operación de replicación puede darse por completada recién cuando se recibe confirmación de que los datos han sido escritos en almacenamiento persistente del sistema destino (modo sincrónico), al dejar los datos en cola de transmisión hacia el destino (modo asincrónico) o en un punto intermedio (al confirmarse la recepción en el sistema destino). Estos modos tienen diferentes propiedades de velocidad de operación, latencia y consistencia. En general, a menor latencia, menor disrupción del servicio en el nodo primario, pero también menor consistencia ante eventos de fallas.
+Para los clusters construidos sobre redes locales (i.e. sobre redes de baja latencia), es conveniente ejecutar la replicación a nivel de bloques en modo sincrónico. Para clusters sobre WANs, o para los procedimientos de recuperación de desastres, es preferible la replicación a nivel de aplicación.
+
+
+\begin{itemize}
+	\item Formas de clustering
+	\begin{itemize}
+		\item de Alta Disponibilidad
+		\item de Almacenamiento
+		\item de Altas Prestaciones
+		\item de Balance de Carga
+	\end{itemize}
+	\item Alta Disponibilidad -> High Availability -> HA 
+	\item Recursos ->  servicios
+	\item Modelo de capas o niveles (\textit{clustering stack})
+	\begin{itemize}
+		\item Mensajería y pertenencia (\textit{messaging/membership agent}): comunicaciones
+		\item Gestión de recursos (\textit{cluster resource manager}, CRM): lógica de asignación de recursos a nodos 
+	\end{itemize}
+	\item Failover
+	\begin{itemize}
+		\item VIP (Virtual IP)
+		\item Migración de recursos
+		\item Almacenamiento compartido o replicado (Fig. \ref{fig:dassannas})
+		\begin{itemize}
+			\item DAS (\textit{Direct Attached Storage})
+			\begin{itemize}
+				\item Unidades de disco locales
+			    \item Filesystem XFS, EXT4
+			\end{itemize}
+			\item NAS (\textit{Network Attached Storage})
+			\begin{itemize}
+				\item Filesystem exportado por otro nodo, que se monta a través de la red
+				\item NFS, SMB/CIFS
+			\end{itemize}
+			\item SAN (\textit{Storage Area Network})
+			\begin{itemize}
+				\item Dispositivo de bloques que aparenta ser local pero es de almacenamiento externo, exportado por otro nodo
+				\item Tecnologías iSCSI, Fibre Channel
+			\end{itemize}
+		\end{itemize}
+		\item \textit{Heartbeats, Quorum, Fencing, Split Brain, STONITH}
+		\begin{itemize}
+			\item Los nodos de un cluster comprueban que pueden alcanzar a sus peers usando mensajes cortos y periódicos llamados latidos (\textit{heartbeats}).
+			\item Si un nodo sufriera un fallo de red, dejaría de alcanzar a un peer y podría llegar erróneamente a la conclusión de que ha caído. Para separar este falso positivo de falla, los nodos siguen protocolos distribuidos que comprueban que son capaces de alcanzar a otros, y además algunos protocolos consultan a otros nodos si pueden alcanzar a los terceros, sospechosos de fallo. Cuando existe una cantidad suficiente de nodos que están de acuerdo sobre el estado de pertenencia de los demás miembros del cluster, se dice que existe \textit{quorum}, y sólo en ese caso se toman ciertas acciones.
+			\item En un cluster de dos nodos, si éstos perdieran contacto entre sí pero no con el resto de la red, ambos se considerarían a sí mismos únicos miembros vivos del cluster. Esta condición se llama \textit{split brain} o \textit{cerebro dividido}. El cluster no es capaz de recuperarse automáticamente de esta condición. Para evitarla, se aplica redundancia en las vías de comunicación de heartbeats (normalmente, más de una interfaz de red, y a veces algún canal secundario separado del subsistema de red, tal como una línea serial).
+
+			\item En clusters de más de dos nodos, al perderse contacto con un nodo, el resto del cluster cae en la incertidumbre sobre su estado. Cuando existe almacenamiento compartido, una falla del nodo podría afectar a los servicios del cluster. Para evitarlo, el cluster utiliza algún mecanismo de \textit{fencing} (separar por la fuerza al nodo presuntamente fallado). Por lo general estos mecanismos se basan en dispositivos que controlan físicamente la alimentación de los nodos. 
+			\item Cuando se pierde comunicación con un nodo por una cantidad de tiempo determinada, el agente de comunicaciones, que vigila la pertenencia al cluster, debe accionar el dispositivo de fencing y provocar una acción de \textit{STONITH (shoot the other node in the head)}, apagándolo. Cuando no existe un dispositivo, sino que es el administrador del cluster quien debe dar de baja manualmente al nodo fallado, se dice que el dispositivo es de tipo \textit{meatware STONITH} (\smiley{}).
+		\end{itemize}
+	\end{itemize}
+	\item Herramientas
+	\begin{itemize}
+		\item Heartbeat v.1, OpenAIS, Corosync, CMAN
+		\item Heartbeat v.2.1.4+, Pacemaker, rgmanager
+		\item LVS
+	\end{itemize}
+	\item Configuraciones
+	\begin{itemize}
+		\item Activo/Pasivo
+		\item Activo/Activo con balance de carga
+		\item Activo/Pasivo con múltiples recursos
+	\end{itemize}
+\end{itemize}
+
+\figura[10]{dassannas}{DAS, NAS, SAN}{DAS-NAS-SAN.jpg}
+
+% ##### Clusters de alta disponibilidad (HAC)
+% Una arquitectura típica de disponibilidad es el cluster de HA donde dos o más nodos de una red ofrecen servicios en forma redundante. Existen diferentes configuraciones, pero la más sencilla es la del cluster de dos nodos, donde uno es el servidor activo o primario de un servicio, y el otro está normalmente en estado pasivo, secundario o standby. La función del secundario, durante la operación normal, es la monitorización del primario para detectar sus caídas o fallas y tomar el control de los servicios.
+% El proceso de migración de un servicio de un nodo a otro se llama failover. La acción de asumir el rol de primario para un servicio desde la situación de standby se llama takeover. Cuando un sistema pierde la característica de ser redundante, por fallo de todas las instancias menos una, se dice que trabaja en modo degradado (momento en que se hace crítica la puesta en servicio de las demás instancias).
+% Este tipo de cluster no debe confundirse con los clusters de Alta Performance de computación (HPC) cuyo objetivo es lograr alta capacidad de procesamiento dividiendo la ejecución de una tarea en varios procesadores, ni con los clusters de Balance de Carga, o Servidores Virtuales, donde simultáneamente se brinda el mismo servicio pero distribuyéndolo sobre varios nodos.
+% Los servicios protegidos por el HAC pueden ser varios de entre los normalmente brindados por un nodo, como WWW, mail, LDAP, NFS, NIS, DHCP, SMB/CIFS, proxy/firewall, etc. y por supuesto el almacenamiento compartido o replicado. En particular existe un recurso sujeto a failover que es una dirección IP especial, de propiedad del cluster. Es la dirección por donde se ofrecen los servicios protegidos. Esta dirección migra convenientemente al nodo que en cada momento detente el rol primario.
+% Es una cuestión de objetivos de diseño si los servicios de un nodo en el HAC están o no corriendo, y en tal caso, en qué modo, mientras el rol del nodo es secundario. Dependiendo de la implementación del servicio, puede ser suficiente un cold standby (los procesos servidores no están ejecutándose) o un warm standby (los servidores están ejecutándose pero sin dar servicio).  Este último modo tiene una penalidad menor en tiempo de arranque de los servicios al momento del failover.
+% Un nodo puede ser a la vez primario para algunos servicios y secundario para otros, aunque en general no aporta nada a la solución del problema de disponibilidad el hecho de distribuir los servicios (si los equipos no son capaces de soportar la carga durante la caída del primario, no lograremos aumentar la disponibilidad de todos modos). En cambio, tiene sentido la distribución de servicios cuando además se pretende balance de carga, aunque entonces no se habla con propiedad de nodos en primario/standby, ni de takeover.
+% 
+% #### Almacenamiento común
+% En general, las aplicaciones responsables de dar los servicios deben compartir alguna cantidad de información de estado o de configuración, disponible a todos los nodos del cluster, para lo cual se agrega un almacenamiento compartido o replicado. 
+% Si existe una sola instancia, compartida, de almacenamiento (p. ej. mediante NFS, o mediante una única unidad de almacenamiento SCSI con doble controlador), se introducirá un SPOF. La alternativa es la replicación del almacenamiento, que dependiendo de los objetivos del sistema HA puede hacerse en varias formas y modos. 
+% La replicación puede ubicarse a nivel de bloques (donde se interpone un módulo de software especial en el camino de I/O de los datos hacia el disco), de filesystem (caso de los filesystems de red como NBD o ENBD), o de archivos. Este último caso sería el de la replicación ejecutada por el administrador de sistemas a nivel de aplicación (con utilitarios como rsync o similares). 
+% Según el modo de operación, cada operación de replicación puede darse por completada recién cuando se recibe confirmación de que los datos han sido escritos en almacenamiento persistente del sistema destino (modo sincrónico), al dejar los datos en cola de transmisión hacia el destino (modo asincrónico) o en un punto intermedio (al confirmarse la recepción en el sistema destino). Estos modos tienen diferentes propiedades de velocidad de operación, latencia y consistencia. En general, a menor latencia, menor disrupción del servicio en el nodo primario, pero también menor consistencia ante eventos de fallas.
+% Para los clusters construidos sobre redes locales (i.e. sobre redes de baja latencia), es conveniente ejecutar la replicación a nivel de bloques en modo sincrónico. Para clusters sobre WANs, o para los procedimientos de recuperación de desastres, es preferible la replicación a nivel de aplicación.
+% 

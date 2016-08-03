@@ -1,0 +1,184 @@
+
+\section{RAID}
+
+Los \emph{arrays} RAID (Redundant Array of Independent Disks) son dispositivos virtuales creados como combinación de dos o más dispositivos físicos. El dispositivo virtual resultante puede contener un filesystem. 
+
+Los diferentes modos de combinación de dispositivos, llamados niveles RAID, ofrecen diferentes características de redundancia y performance. Un array RAID con redundancia ofrece protección contra fallos de dispositivos. 
+
+Los dispositivos Software RAID de Linux son creados y manejados por el driver \lstinline{md} (Multiple Device) y por eso suelen recibir nombres como \lstinline{md0}, \lstinline{md1}, etc.
+
+ 
+\begin{itemize}
+	\item Redundancia para tolerancia a fallos
+	\item Mejoramiento de velocidad de acceso
+	\item Hardware RAID, Fake RAID, Software RAID
+	\item Niveles RAID
+	\item RAID Devices
+	\item Spare disks, faulty disks
+\end{itemize}
+
+
+
+\subsection {Niveles RAID}
+
+\begin{description}
+	\item [Linear mode] Dos o más dispositivos concatenados. La escritura de datos ocupa los dispositivos en el orden en que son declarados. 
+Sin redundancia.
+Mejora la performance cuando diferentes usuarios acceden a diferentes secciones del file system, soportadas en diferentes dispositivos.
+	\item [RAID-0] Las operaciones son distribuidas (\emph{striped}) entre los dispositivos, alternando circularmente entre ellos. Cada dispositivo se accede en paralelo, mejorando el rendimiento. Sin redundancia. 
+	\item [RAID-1]
+Dos o más dispositivos replicados (\emph{mirrored}), con cero o más \emph{spares}. 
+Con redundancia. Los dispositivos deben ser del mismo tamaño. Si existen \emph{spares}, en caso de falla o salida de servicio de un dispositivo, el sistema reconstruirá automáticamente una réplica de los datos sobre uno de ellos. 
+En un RAID-1 de $N$ dispositivos, pueden fallar o quitarse hasta $N-1$ de ellos sin afectar la disponibilidad de los datos. 
+Si $N$ es grande, el bus de I/O puede ser un cuello de botella (al contrario que en Hardware RAID-1). El scheduler de Software RAID en Linux asigna las lecturas a aquel dispositivo cuya cabeza lectora está más cerca de la posición buscada. 
+	\item [RAID-4] No se usa frecuentemente. Usado sobre tres o más dispositivos. Mantiene información de paridad sobre un dispositivo, y escribe sobre los restantes en la misma forma que RAID-0. El tamaño del array será $(N-1)*S$, donde $S$ es el tamaño del dispositivo de menor capacidad en el array. 
+Al fallar un dispositivo, los datos se reconstruirán automáticamente usando la información de paridad. El dispositivo que soporta la paridad se constituye en el cuello de botella del sistema. 
+
+
+\item [RAID-5]
+Utilizado sobre tres o más dispositivos con cero o más \emph{spares}. El tamaño del dispositivo RAID será $(N-1)*S$. La diferencia con RAID-4 es que la información de paridad se distribuye entre los dispositivos, eliminando el cuello de botella de RAID-4 y obteniendo mejor performance en lectura. Al fallar uno de los dispositivos, los datos siguen disponibles. Si existen \emph{spares}, el sistema reconstruirá automáticamente el dispositivo faltante. Si se pierden dos o más dispositivos simultáneamente, o durante una reconstrucción, los datos se pierden definitivamente. RAID-5 sobrevive a la falla de un dispositivo, pero no de dos o más. 
+La performance en lectura y escritura mejora con respecto a un solo dispositivo. 
+
+\item [RAID-6]
+Usado sobre cuatro o más dispositivos con cero o más \emph{spares}. La diferencia con RAID-5 es que existen dos diferentes bloques de información de paridad, distribuidos entre los dispositivos participantes, mejorando la robustez. El tamaño del dispositivo RAID-6 es $(N-2)*S$. Si fallan uno o dos de los dispositivos, los datos siguen disponibles. Si existen \emph{spares}, el sistema reconstruirá automáticamente los dispositivos faltante. La performance en lectura es similar a RAID-5, pero la de escritura no es tan buena.
+
+\item [RAID-10]
+Combinación de RAID-1 y RAID-0 completamente ejecutada por el kernel, más eficiente que aplicar dos niveles de RAID independientemente. Es capaz de aumentar la eficiencia en lectura de acuerdo a la cantidad de dispositivos, en lugar de la cantidad de pares RAID-1, ofreciendo un 95\% del rendimiento de RAID-0 con la misma cantidad de dispositivos. Los \emph{spares} pueden ser compartidos entre todos los pares RAID-1.
+
+\begin{comment}
+
+\item [FAULTY]
+
+Nivel especial de RAID que sirve para debugging del array por inyección de fallos de lectura y escritura. Sólo permite un dispositivo. Simula fallos a bajo nivel, permitiendo analizar comportamiento en caso de fallos de sector en lugar de fallos de discos.
+\end {comment}
+
+\end{description}
+
+\subsection {Modos de operación}
+
+\begin{description}
+	\item [Create] 
+	Creación de un array nuevo con superblocks por cada dispositivo.
+	 \item [Assemble]
+	Ensamblar dispositivos componentes previamente creados para conformar un dispositivo RAID activo. Los componentes pueden especificarse en el comando o ser identificados por scanning. 
+	\item [Follow o Monitor]
+Monitorizar un dispositivo RAID y actuar en caso de eventos interesantes. No se aplica a RAID niveles 0 ni linear, ya que sus componentes no poseen estados (\emph{failed}, \emph{spare}, \emph{missing}). 
+
+	\item [Build]
+	Construir un array sin superblocks por dispositivo (para expertos).
+	\item [Grow]
+	Extender o reducir un array, cambiando el tamaño de los componentes activos (RAID 1, 4, 5 y 6) o cambiando el número de dispositivos activos en RAID1.
+	\item [Manage]
+	Manipular componentes específicos de un array, como al agregar nuevos dispositivos \emph{spare} o al eliminar dispositivos \emph{faulty}.
+	\item [Misc]
+	Toda otra clase de operaciones sobre arrays activos o sus componentes.
+
+\end{description}
+
+\subsection{Construcción y uso de un array RAID-1}
+
+
+
+Crear particiones en ambos discos, tipo fd (Linux RAID autodetect)
+\begin{lstlisting}
+fdisk /dev/sdb; fdisk /dev/sdc
+\end{lstlisting}
+
+Crear el array
+\begin{lstlisting}
+mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb1 /dev/sdc1
+watch cat /proc/mdstat
+\end{lstlisting}
+
+Usar el array
+\begin{lstlisting}
+mkfs -t ext3 /dev/md0
+mkdir /datos
+mount -t ext3 /dev/md0 /datos
+cp /etc/hosts /datos
+ll /datos
+\end{lstlisting}
+
+Examinar el array
+\begin{lstlisting}
+cat /proc/mdstat
+cat /proc/partitions
+mdadm --examine --brief --scan --config=partitions
+mdadm --examine /dev/sdc
+mdadm --query --detail /dev/md0
+\end{lstlisting}
+
+Crear script de alerta
+\begin{lstlisting}
+cat > /root/raidalert
+#!/bin/bash
+echo $(date) $* >> /root/alert
+^D
+chmod a+x /root/raidalert
+\end{lstlisting}
+
+Monitorear el arreglo con script de alerta
+\begin{lstlisting}
+mdadm --monitor -1 --scan --config=partitions --program=/root/raidalert
+\end{lstlisting}
+
+Crear configuración
+\begin{lstlisting}
+cat > /etc/mdadm.conf
+DEVICE=/dev/sdb1 /dev/sdc1
+ARRAY=/dev/md0 devices=/dev/sdb1,/dev/sdc1
+PROGRAM=/root/raidalert
+\end{lstlisting}
+
+Establecer tarea periódica de monitoreo
+\begin{lstlisting}
+crontab -e
+MAILTO=""
+*/2 * * * * /sbin/mdadm --monitor -1 --scan 
+\end{lstlisting}
+
+Declarar un fallo
+\begin{lstlisting}
+mdadm /dev/md0 -f /dev/sdb1
+cat /root/alert
+\end{lstlisting}
+
+Quitar un disco del array
+\begin{lstlisting}
+mdadm /dev/md0 -r /dev/sdb1 
+cat /root/alert
+\end{lstlisting}
+
+Reincorporar el disco al array
+\begin{lstlisting}
+mdadm /dev/md0 -a /dev/sdb1 
+cat /proc/mdstat
+cat /root/alert
+\end{lstlisting}
+
+Destruir el array
+\begin{lstlisting}
+mdadm --stop /dev/md0
+\end{lstlisting}
+
+\subsection {Temas de práctica}
+\begin{enumerate}
+	\item ¿Qué marcas, modelos y precios de tarjetas controladoras RAID puede encontrar? ¿Con qué capacidades?
+	\item ¿Qué diferencias hay entre Software RAID y Hardware RAID?
+	\item ¿Qué niveles RAID ofrecen redundancia? ¿Contra qué eventos protege esta redundancia? ¿Contra qué eventos \emph{no} protege esta redundancia? 
+	\item El uso de un dispositivo RAID, ¿es un reemplazo efectivo para las políticas y actividades de backup?
+	\item ¿Cuáles niveles RAID ofrecen mejor velocidad de trabajo? ¿De qué factores depende la ventaja en performance de los diferentes niveles RAID entre sí y con respecto al uso de una única unidad de disco?
+	\item ¿Cuál es la diferencia entre los niveles Linear RAID y RAID 0? ¿Qué clase de redundancia ofrece cada uno? ¿Contra qué eventos protege?
+	\item Preparar un arreglo linear RAID sobre dos dispositivos loop. Observe qué relación tiene el espacio disponible en el dispositivo con los archivos que soportan los dispositivos loop.
+	\item Preparar un arreglo linear RAID sobre dos discos extra agregados al equipo. 
+	\item Preparar un arreglo RAID nivel 0 sobre dos discos extra agregados al equipo. 	
+	\item ¿Puede medir la diferencia en performance entre los dispositivos de   los ejercicios anteriores, de linear RAID y de nivel 0? ¿Tiene sentido esta medición cuando el equipo es una máquina virtual? 
+	\item Preparar un RAID nivel 1 sobre dos discos extra. Inyectar un fallo en uno de los discos. Agregar un nuevo disco e incorporarlo al RAID. Observar la sincronización del dispositivo.
+	\item Como antes, preparar un RAID nivel 1 sobre dos discos extra, pero con una unidad \emph{spare}. Inyectar un fallo en uno de los discos y observar el comportamiento del dispositivo. 
+	\item Retire el disco fallado y compruebe en qué estado queda el dispositivo.
+	\item Vuelva a agregar el disco y compruebe en qué estado queda el dispositivo. 
+	\item ¿Con qué comandos se investiga el estado de un dispositivo RAID? ¿Cómo se sabe cuándo un dispositivo RAID está activo o en modo degradado? ¿Cómo se sabe cuándo un dispositivo está fallado, activo, sincronizando?
+	\item ¿Cuál es la forma de convertir en dispositivo RAID 1 un filesystem ya existente?
+	\item ¿Cómo se puede adaptar el comportamiento de un RAID 1 a una situación con discos asimétricos (uno más rápido que el otro)?
+	
+\end{enumerate}

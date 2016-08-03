@@ -1,0 +1,138 @@
+\section{Conceptos de Disponibilidad}
+\begin{itemize}
+	\item Fallos
+	\item Modos de fallo
+	\begin{itemize}
+		\item Fallo silencioso: El sistema deja de cumplir su función sin notificarlo
+		\item Fallo bizantino: El sistema sigue cumpliendo su función en forma incorrecta
+		\item Modo Fail-stop: Al fallar, el sistema deja de funcionar
+	\end{itemize}
+	\item Tolerancia a fallos: Propiedad que permite a un sistema continuar operando correctamente ante fallos de algunos de sus componentes	
+	\item Cada sistema existe sobre un continuo de tiempo dividido en Tiempo entre Fallas (TTF) y Tiempo de Reparación (TTR). 
+	\begin{itemize}
+		\item MTBF (\textit{Mean Time Between Failures}), tiempo promedio entre fallos.
+		\item MTTR (\textit{Mean Time To Repair}), tiempo promedio para la reparación.
+	\end{itemize}
+	\item La proporción del tiempo en la cual realmente está operando el sistema mide la disponibilidad. 
+	\begin{itemize}
+		\item En promedio, $D = MTBF / (MTBF + MTTR)$.
+		\item La disponibilidad se elevará entonces aumentando el MTBF y/o reduciendo el MTTR. 
+		\item La selección de sistemas confiables a nivel de hardware apunta a aumentar el MTBF. 
+		\item La implementación de técnicas de Alta Disponibilidad pretende reducir lo más posible los períodos de carencia de los servicios o TTR, por lo tanto el MTTR. 
+		\item En esta fórmula se consideran únicamente los tiempos de carencia del servicio \textit{no planificados}.
+	\end{itemize}
+	\item Paradas planificadas
+	\begin{itemize}		
+		\item Backups, instalación de patches, upgrades
+	\end{itemize}
+	\item Paradas no planificadas
+	\begin{itemize}		
+		\item Recuperables: Error de la aplicación, error del operador, apagones, caídas de red, fallas de hardware
+		\item Desastres: Accidentes, robos, sabotajes, incendios, meteoros, catástrofes naturales
+	\end{itemize}
+	\item La no disponibilidad tiene generalmente un costo para la organización, y puede controlarse con medidas especiales.
+\end{itemize}
+
+\subsection{Alta Disponibilidad}
+
+Las técnicas de Alta Disponibilidad (\textit{High Availability, HA}) buscan construir un sistema que dé soporte para la provisión de un servicio durante la mayor parte del tiempo que sea posible. Las medidas para lograr esta meta abarcan varios niveles de actividad, y van desde prácticas adecuadas de administración de sistemas, pasando por elecciones especiales de soporte de hardware, políticas de backup, implantación de sistemas especiales de HA con redundancia, hasta la preparación de estrategias de Recuperación de Desastres (\textit{Disaster Recovery}). Las medidas se apoyan unas en otras, y deben ser implementadas en orden creciente de complejidad y costo (Fig. \ref{fig:nivelesha}). 
+
+\figura[15]{nivelesha}{Jerarquía de medidas de disponibilidad}{niveles-ha.pdf}
+
+Alta disponibilidad \textbf{no es}:
+\begin{itemize}
+	\item Servicio Continuo, donde el usuario no ve interrupciones del servicio.
+	\item Tolerancia a Fallos, que es una característica del hardware redundante y altamente confiable.
+	\item Balance de Carga, aunque algunos modelos de HA lo incluyen como beneficio adicional.
+	\item Recuperación de Desastres, donde se supone que existe una pérdida de datos que se debe subsanar.
+\end{itemize}
+
+Al implementar medidas de Alta Disponibilidad no pretendemos servicio continuo. Sin embargo, aunque el usuario puede llegar a percibir interrupciones o anomalías en el servicio, normalmente se puede lograr un \quotes{tiempo de reparación} tolerable, y a veces imperceptible. En la práctica, ante un evento de impacto, esto se traduce en una conexión interrumpida con el servicio pero que se recupera dentro de las próximas acciones del cliente (siguientes reintentos de lectura por la aplicación, siguiente click del usuario, etc.). 
+
+\subsection{Redundancia y disponibilidad}
+El principio fundamental de HA es la eliminación de los puntos únicos de falla (\textit{Single Point of Failure, SPOF}) por duplicación o multiplicación de puntos de servicio. Esta técnica se llama en general \textit{redundancia}. 
+
+Si un servicio tiene una disponibilidad de 90\% (o sea, una probabilidad de estar disponible igual a 0.9) sobre un período dado, su probabilidad de carencia o no disponibilidad en ese período es $1 - 0.9 = 0.1$. Si el recurso puede implementarse en forma redundante, y suponiendo eventos de fallo independientes, la probabilidad de que dos instancias del recurso estén no disponibles a la vez en ese mismo período es $0.1 * 0.1 = 0.01$; con lo cual la probabilidad de disponibilidad del servicio es ahora $1 - 0.01 = 0.99$, o sea 99\% para dicho período. Al agregarse la segunda instancia de recurso se ha eliminado el SPOF y se ha ganado un orden de magnitud en disponibilidad.
+ 
+Para ilustración, cuando un servicio tiene una disponibilidad del 99\% por año, esto quiere decir que en promedio la no disponibilidad del servicio ocurrirá durante 3.65 días por año. En cambio, si la disponibilidad es de 99.99\%, el servicio quedará no disponible a lo sumo durante 52.5 min por año.
+
+La suposición de que los eventos de fallo son independientes se basa en que no existan SPOFs de nivel superior, es decir, anteriores en la cadena de precondiciones para el servicio (por ejemplo, se supone que existen diferentes líneas de alimentación eléctrica). No es posible construir un sistema completo sin ningún SPOF, pero es posible delimitar ámbitos de responsabilidad donde no existan.
+
+
+
+\subsection{Métricas económicas}
+
+\begin{description}
+\item [Probabilidad] Cantidad de veces que se espera ocurra el evento durante la vida remanente del sistema. Un evento que puede ocurrir semanalmente durante los próximos cinco años tiene una probabilidad de 260\footnote{Este concepto de probabilidad se llama originalmente \textit{likelihood}, y claramente no se trata del mismo concepto de la probabilidad matemática, que únicamente puede tomar valores entre 0 y 1.}.
+\item [Duración] Cantidad de tiempo en que los usuarios carecerán del servicio a causa del evento. Incluye el tiempo necesario para el restablecimiento del servicio y para notificar a los usuarios dicho restablecimiento.
+\item [Impacto] Porcentaje de la comunidad de usuarios que se verá afectada por el evento.
+\end{description}
+
+\begin{itemize}
+ 	\item Cálculo de riesgos para cada evento $e_{i}$ en el sistema original 
+ 	\begin{itemize}
+ 		\item Efecto $E_{b} = Probabilidad * Duraci\'on * Impacto$
+ 		\item Riesgo $R_{b} = Costo(ND) * \sum{ E_{b}(e_{i})}$
+ 	\end{itemize}
+ 	\item Luego de implementar HA
+ 	\begin{itemize}
+ 		\item Efecto $E_{a} = Probabilidad_{HA} * Duración_{HA} * Impacto_{HA}$
+ 		\item Riesgo $R_{a} = Costo(ND) * \sum{ E_{a}(e_{i}) + Costo(HA)}$
+ 		\item Ahorro $A = R_{b} - R_{a}$
+ 	\end{itemize}
+ 	\item Retorno de inversión $ROI = A / Costo(HA)$
+\end{itemize}
+ 
+
+% #### Heartbeat
+% El componente fundamental del HAC es un servicio de detección de fallas de los peers dentro del cluster. Este software permite determinar en qué momento un nodo debe hacerse responsable de un servicio. Este suele llamarse servicio de heartbeat (\"latido\") ya que es el equivalente de \"tomar el pulso\" del servidor primario. 
+% Para eliminar los SPOFs relacionados con el heartbeat se utilizan diferentes vía de comunicación entre los nodos que constituyen el cluster. Típicamente, el heartbeat se transmite redundantemente por las interfaces de red y por un vínculo serial, para superar caídas del subsistema de red de los nodos.
+% 
+% #### Cerebro Dividido
+% La condición de Cerebro Dividido o split-brain se presenta cuando, por fallas en la comunicación entre los nodos, ambos creen tener el rol primario para un servicio. Esta situación puede acarrear problemas con respecto al almacenamiento secundario replicado o compartido (pérdida de consistencia o corrupción de datos). Se necesita una instancia de "i/o Fencing" para evitar el acceso no coordinado a este almacenamiento.
+% En caso de pérdida de comunicación, el secundario, antes de asumir el rol de primario y comenzar a dar el servicio, debe asegurarse de que el primario efectivamente ha abandonado el cluster. Para esto primeramente se cerciora de que el problema no está en sus propias interfaces (verificando la llegada a un conjunto de nodos considerados \"estables\") y en caso favorable fuerza la desconexión del sistema dudoso accionando la alimentación del mismo. Esta característica del HAC recibe a veces el nombre de "stonith" (Shoot The Other Node In The Head). La conexión de cada nodo al dispositivo de control de la UPS del otro es lo que hace posible la implementación de stonith.
+% El modelo completo del cluster HA se ve en la figura adjunta.
+% 
+% http://tavi.uncoma.edu.ar/ha/altaDisponibilidad.png
+% 
+% ##### HAC en Linux
+% 
+% #### Proyecto Linux-HA (http://www.linux-ha.org)
+% Este proyecto centraliza los esfuerzos de proporcionar herramientas de HA al sistema operativo, con el objetivo de proveer un framework general de HA para cualquier servicio. En especial ofrece el software heartbeat, que implementa la lógica necesaria para que un nodo secundario detecte la condición de caída de un primario, se asuma él mismo como primario y lance los servicios protegidos por el cluster.
+% Heartbeat es un conjunto de scripts y programas que corre, con idéntica configuración, en todos los miembros del cluster de HA. Su misión es, por un lado, determinar el momento en que el nodo primario deja de prestar servicio; y subsiguientemente, forzar el takeover a cargo del hasta entonces secundario. Para esto lanza en el secundario los scripts de iniciación de los servicios que normalmente arrancan al inicio del sistema. El lanzamiento de estos servicios debe tener en cuenta la información de configuración común a ambos nodos, disponible en el dispositivo de almacenamiento replicado.
+% Al realizar el takeover del IP característico del cluster, heartbeat anuncia este evento a la red mediante un ARP gratuito (simulando responder a una consulta ARP por su dirección MAC). Los demás nodos de la red que reciben este broadcast, tal como se estipula en RFC XXX, deben actualizar su tabla ARP, con lo cual los siguientes paquetes dirigidos a la dirección del cluster serán montados sobre un frame con la dirección destino de nivel 2 del nuevo nodo primario.
+% La detección de fallas del primario a cargo de heartbeat está en el orden de uno a dos segundos, y es configurable por el usuario. El tiempo de recuperación del servicio se computa como la suma de este segundo más el tiempo de startup del servicio.
+% 
+% #### Proyecto DRBD (http://www.drbd.org)
+% El software drbd implementa un dispositivo de bloques replicado, configurando un RAID 1 (mirroring) por red. Este software es un módulo que presenta una interfaz de dispositivo de bloques al resto del kernel. El usuario normalmente lo utiliza para montar un filesystem sobre él. 
+% Toda actividad sobre el dispositivo reservado del primario es capturada por el módulo, y además de ser grabada en el disco del primario es transmitida al secundario o réplica. 
+% El vínculo por el cual circulan los datos de bloques que deben actualizarse en el secundario, y por donde se realizan las sincronizaciones, suele ser una conexión de red dedicada, de la mayor velocidad posible. Ante un evento de caída de uno u otro de los nodos ocurre una resincronización automática. La vuelta del rol de primario al nodo que lo detentaba anteriormente es una opción de configuración.
+% DRBD está restringido a un conjunto de dos nodos. Por lo tanto los clusters HA basados en DRBD tienen exactamente dos nodos (aunque cada nodo puede tener configurados diferentes recursos DRBD y pertenecer a varios clusters). Puede funcionar tanto en LAN como en WAN, utilizando diferentes protocolos de replicación para favorecer la performance en caso de alta latencia (como en WAN) o maximizar la expectativa de consistencia (en caso de LAN).
+% 
+% #### Proyecto Mon
+% Heartbeat asume que los modos de fallo de los sistemas protegidos serán de hardware (es decir, asume que una vez bien configurado, el software que implementa los servicios correrá indefinidamente), por lo cual la indicación de \"peer vivo\" es el resultado positivo de un ping a través de la red. Esto no ofrece información sobre la disponibilidad de los servicios mismos. Es posible adaptar a heartbeat para utilizar sensores más especializados en la detección de problemas específicos. El proyecto Mon provee una herramienta genérica de supervisión de servicios.
+% 
+% ##### Aplicaciones y estado
+% Las diferentes aplicaciones que realizan los servicios protegidos por el cluster descansan en el mantenimiento de un determinado estado, interno de la aplicación, el que en general no es transferible al nodo que realiza el takeover sin un importante compromiso de parte de la aplicación. En general las aplicaciones no proveen protocolos de replicación de estado para ambientes de HA, por lo cual este es un problema difícil en algunos casos. La implementación del espejado completo de un sistema, transparente a las aplicaciones, supondría la existencia de una memoria compartida, con exigencias técnicas superiores a las dimensiones de la solución pretendida para el problema. 
+% Sin embargo, existen algunos casos donde la migración del estado no es un problema, y el cluster de HA permite una solución casi completamente transparente para una amplia gama de servicios, especialmente aquellos que presentan tráfico en ráfagas breves con conexión y desconexión incluidas (como WWW, mail o SAMBA), o aquellos que directamente no dependen de estado (como NFS, DNS, LDAP o DHCP).
+% La mayor dificultad para proteger servicios consiste en la imposibilidad de migrar conexiones TCP. En particular, y como ejemplo, no es directamente posible migrar una conexión ssh dado que el conducto virtual brindado por TCP para el mantenimiento de esta sesión se rompe al caer el nodo primario. 
+% Una posible solución es la replicación del estado de las conexiones TCP, que es mantenido en espacio del kernel. Existe un trabajo llamado TCPCP (TCP Connection Passing), actualmente en desarrollo por Werner Almesberger, cuya intención es permitir la migración transparente de un extremo de una conexión TCP. Este trabajo se encuentra en fase de prueba de concepto.
+% 
+% #### Motores de BD y HA
+% Repitamos que HA no implica servicio continuo. Los clientes de motores de Bases de Datos que utilicen conexiones persistentes sobre TCP (como ODBC) serán vulnerables a la ruptura de conexiones por caída del primario. Sin embargo, si la aplicación se encarga de la consistencia, es decir, si las aplicaciones clientes incorporan la lógica de reconexión, y los servidores contemplan el uso de rollbacks en caso de desconexiones, entonces se puede mantener con efectividad un servicio altamente disponible, minimizando el tiempo de failover.
+% 
+% #### Firewalls y HA
+% Los firewalls sin estado (stateless) no presentan problemas para la replicación del servicio. Sin embargo, los más avanzados (o stateful) sí dependen de una información de estado mantenida internamente. 
+% Este estado comprende la tabla de traducciones o NAT, por la cual se sabe qué conexiones traficadas por la interfaz externa corresponden a qué conexiones iniciadas desde la LAN interna. Este es el caso de los firewalls construidos sobre netfilter, la tecnología de filtrado de paquetes en el kernel Linux, configurados usando el utilitario iptables.
+% El firewall realiza una asignación de nuevas direcciones origen de transporte sobre la interfaz pública a las conexiones establecidas, originadas en la LAN protegida. Esta asignación se refleja en el estado mantenido por el módulo ip_conntrack del sistema netfilter. En caso de una caída del firewall primario y posterior migración o failover del servicio, a falta de este estado, las conexiones deben reiniciarse sobre el nuevo firewall, recibiendo una nueva asignación de dirección externa. Los paquetes traficados con esta nueva dirección no serán reconocidos por el servidor como parte de la conexión anterior. Esto implica que, aun cuando los clientes que realicen peticiones de cumplimiento breve puedan no llegar a darse cuenta de la caída del servicio, las transferencias largas podrán perderse por ruptura de la conexión. La reanudación de la transferencia a partir del punto de corte es una facultad de ambas aplicaciones cliente y servidor, que pueden o no implementarla ambos a la vez.
+% Si bien este modelo de failover es consistente con las suposiciones hechas sobre HA (donde no se pretende un servicio continuo), en el caso del firewall el estado de la aplicación es lo suficientemente pequeño como para hacer factible una recuperación transparente. 
+% 
+% ### ct_sync
+% Existe un desarrollo relativamente reciente llamado ct_sync, consistente en una modificación al módulo de iptables ip_conntrack, que implementa un protocolo de comunicación de estado a un firewall secundario en warm standby, es decir, que está corriendo pero en modo pasivo. Refs.: http://www.wiz.ro/linux/half, http://people.netfilter.org/~hidden/nfws_2003_ha.pdf
+% 
+% #### Redundancia de vínculos de Internet
+% 
+% ### multihomed
+% En http://multihomed.sourceforge.net hay un script que utiliza un concepto similar a Heartbeat para validar los enlaces de acceso a Internet de un host frontera. Si se encuentran caídos, levanta otras interfaces, actualiza rutas, modifica configuración de proxy Squid, etc., en un orden configurable.
+% Como a veces el ICMP está filtrado por administración, en lugar de pings utiliza mensajes SYN y recoge los ACKs para comprobar que se puede acceder a determinados hosts configurables y supuestamente siempre activos.
+% 
