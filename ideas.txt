@@ -1,0 +1,11 @@
+Ideas
+
+Scripting: 
+	*scripting transversal. Solo la primer semana de trabajo específico. 
+	Objetivos principales: análisis y accesibilidad. Modificaciones sencillas. 
+
+Almacenamiento: 
+	*Observar LVM y md software RAID. Lograr configuraciones 
+	clásicas. 
+	*Explicar de forma grupal un script basado en LV y md. Una modificación sencilla. 
+

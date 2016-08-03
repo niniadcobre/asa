@@ -1,5 +1,8 @@
 Cronograma 
 
+El siguiente cronograma es TENTATIVO y sujeto a modificaciones que serán debidamente
+informadas en clase y PEDCO.
+
     Agosto 2016         Septiembre 2016         Octubre 2016      
 do lu ma mi ju vi sá  do lu ma mi ju vi sá  do lu ma mi ju vi sá  
     1  2  3  4  5  6               1  2  3                     1  
@@ -29,17 +32,38 @@ Miércoles 21/09 Día del estudiante
 Lunes     10/10 Día de respeto a la diversidad cultural (12/10)
 Lunes     28/11 Día de la Soberanía Nacional 
 
-Temas 
-Scripting avanzado (transversal)
-    Accesibilidad
-    Análisis 
-Administración de Almacenamiento
-    LVM 
-    RAID 
-    SMART
-    Comparativa: Storgae Foundation, ZFS, Solaris Volume Manager 
-Estrategias de Respaldo
-    sincronización/rsync
-    Replicación 
-Virtualización 
-Alta disponibilidad 
+
+1  Semana 8/8	
+	Inicio de clases, presentación. 
+	Scripting. 
+2  Semana 15/8
+	Almacenamiento  
+3  Semana 22/8
+	Almacenamiento  
+4  Semana 29/8
+	Almacenamiento  
+5  Semana 5/9
+	Almacenamiento  
+6  Semana 12/9
+	Estrategias de respaldo
+7  Semana 19/9
+	Estrategias de respaldo
+8  Semana 26/9
+	Examen parcial 
+9  Semana 3/10
+	Virtualización
+10 Semana 10/10
+	Virtualización / Recuperatorio 
+11 Semana 17/10
+	Virtualización 
+12 Semana 24/10
+	Alta disponibilidad 
+13 Semana 31/10
+	Alta disponibilidad 
+14 Semana 7/11
+	Alta disponibilidad 
+15 Semana 14/11
+	Parcial 
+16  Semana 21/11
+	Recuperatorio 
+
