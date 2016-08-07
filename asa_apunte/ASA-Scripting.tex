@@ -74,6 +74,7 @@ Obtener mediante un cliente de HTTP una lista de archivos cuyos nombres están d
 De un conjunto de archivos tar, encontrar aquellas versiones de un archivo dado, contenido en ellos, que hayan sido modificadas entre dos fechas dadas.
 \end{enumerate}
 
+Las secuencias a continuación son ilustrativas. Se recomienda seguir paso a paso, {\bf comprendiendo cabalmente cada orden}. Incluyendo la interpretación del por qué de los errores mostrados. 
 
 \subsection{Aritmética}
 \begin{lstlisting}
@@ -118,6 +119,7 @@ $ let h=16#ABCD; echo $h
 \end{lstlisting}
 
 \subsection{Arreglos}
+
 \begin{lstlisting}
 $ A=(1 2 3 cuatro cinco)
 $ echo ${!A[*]}
@@ -145,6 +147,11 @@ paris
 
 
 \subsection{Here-Documents}
+
+La siguiente técnica permite la creación de archivos de texto dentro de un script. Por ejemplo, podría ser 
+necesario crear cierto archivo de configuración en aquellas máquinas de la organización que posean cierto 
+software instalado. 
+
 \begin{lstlisting}
 $ cat > texto.txt << END
 > Hola
@@ -154,6 +161,11 @@ $ cat texto.txt
 \end{lstlisting}
 
 \subsection{Traps}
+
+El mecanismo de traps, propio del bash, le permite al shell reaccionar frente a ciertos eventos. Por ejemplo,
+el desarrollador del script podría necesitar eliminar archivos temporales, creados para fines del script, en caso
+de que el usuario decida interrumpir la ejecución (Ctrl+C). 
+
 \begin{lstlisting}
 # man 7 signal
 # 1 = SIGHUP (Hangup of controlling terminal or death of parent)
@@ -165,7 +177,7 @@ $ cat texto.txt
 trap limpieza 1 2 3 6 9
 function limpieza
 {
-	echo "Recibimos senal - desmantelando..."
+	echo "Recibimos señal - desmantelando..."
 	rm -f ${tempfiles}
 	echo Finalizando
 }
@@ -175,13 +187,31 @@ function limpieza
 
 \section{Casos de uso}
 
+A continuación se presentan un conjunto de problemas a resolver utilizando scripting. Se pretende que el alumno evalúe la posibilidad de resolución, e intente de ser posible el desarrollo de una solución. 
+
+Las siguientes preguntas pretenden ser de ayuda en el comienzo del análisis:
+\begin{itemize}
+\item ¿Existe alguna herramienta que realice el trabajo? Como regla general, se evita ``re-inventar la rueda''.
+\item ¿Es el shell el lenguaje indicado para resolver el problema?
+\item ¿Cuál es/son la/s plataforma/s sobre la/s que se ejecutará el script? 
+\item ¿Qué shell es el indicado? (relacionado a la pregunta anterior)
+\item ¿A quién pertenece el desarrollo?¿Qué licencia se utilizará para el script?
+\item ¿Quién será el usuario del script?¿Necesita permisos especiales?
+\item ¿Utiliza el script software adicional que no se encuentra usualmente pre-instalado en las computadoras destino?
+\item ¿Requiere el script algún tipo de interfaz con el usuario? 
+\item ¿Será necesario implementar opciones que modifiquen el comportamiento estándar?
+\item ¿Recibirá el script algún tipo de argumento?
+\item Dimensionar el problema. ¿Es necesaria algún tipo de modularización?
+\item ¿Emite algún tipo de salida? (error o estándar). 
+\item ¿Cuáles serán los códigos de error del script? (exit)
+\end{itemize}
 
 \subsection{Investigar el sistema}
 \begin{enumerate}
 	\item 
 Modificar la salida del comando blkid para conocer el UUID, el nombre y tipo, y punto de montado, de cada dispositivo de bloques del sistema.
 	\item 
-Analizar archivos de log buscando conocimiento: duración de sesiones ssh por usuario, mensajes de mail entre usuarios, con histograma por tamaños, etc. (ver iptables.log, \ref{sec:iptables.log})
+Analizar archivos de log buscando conocimiento: duración de sesiones ssh por usuario, mensajes de mail entre usuarios, con histograma por tamaños, etc.
 	\item 
 Detectar momentos en que la salida de vmstat muestra picos de I/O, procesos corriendo, procesos en espera, uso de swap, etc.
 \end{enumerate}
@@ -200,14 +230,12 @@ Idem, enviando nombres a un archivo y usándolo como lista para borrarlos, compr
 
 \end{enumerate}
 
-
-
 \subsection{Networking}
 \begin{enumerate}
 	\item 
-Disparar un aviso cuando se pierde la conectividad a un conjunto dado de nodos de la red.
+Disparar un aviso cuando se pierde la conectividad a un conjunto de nodos de la red.
 	\item 
-Analizar la salida del comando netstat para descubrir en qué momento aparece un nuevo port abierto y a qué aplicación corresponde.
+Analizar la salida del comando netstat para descubrir en qué momento aparece un nuevo puerto abierto y a qué aplicación corresponde.
 	\item 
 Obtener un log de tráfico y obtener orígenes máximos y mínimos de tráfico, cantidades totales de bytes traficados por interfaz, etc.
 	\item 
@@ -279,6 +307,21 @@ Generar un directorio /home/usuario para cada alumno activo, con UID correspondi
 
 
 \section{Accesibilidad para usuarios finales}\label{ref:acces}
+
+La mayoría de los scripts suelen estar orientados al usuario administrador. El uso del shell desde la línea de 
+comandos es complejo para la mayoría de los usuarios finales, poco amigable e intuitivo. Sin embargo, en 
+ciertos casos puede ser de utilidad, o incluso necesario, que el usuario no administrador utilice ciertos scripts en su tarea diaria. En tal sentido existen herramientas que vinculan el shell script con el entorno gráfico, dando mayor accesibilidad. Se mencionan algunas de ellas a continuación: 
+
+\begin{itemize}
+\item xmessage   
+\item notify-send 
+\item tput / setterm  
+\item xdotool
+\item dialog 
+\item zenity (GNOME) / kdialog (KDE)
+\item Algunos navegadores de archivos como Nautilus y Caja, entre otros, permiten extender su funcionalidad incorporando algún método que permita la ejecución de scripts desde la interfaz gráfica. 
+\begin{itemize}
+
 \subsection{Ejercitación propuesta}
 \begin{enumerate}
 	\item 
