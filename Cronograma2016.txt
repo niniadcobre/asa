@@ -32,12 +32,15 @@ Miércoles 21/09 Día del estudiante
 Lunes     10/10 Día de respeto a la diversidad cultural (12/10)
 Lunes     28/11 Día de la Soberanía Nacional 
 
+Clases:
+	Lunes 18:30-22:30 / Lab I 
+	Jueves 14-19 / Lab I
 
 1  Semana 8/8	
 	Inicio de clases, presentación. 
 	Scripting. 
 2  Semana 15/8
-	Almacenamiento  
+	Scripting / Almacenamiento  
 3  Semana 22/8
 	Almacenamiento  
 4  Semana 29/8
@@ -66,4 +69,6 @@ Lunes     28/11 Día de la Soberanía Nacional
 	Parcial 
 16  Semana 21/11
 	Recuperatorio 
+
+
 
