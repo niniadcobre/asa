@@ -54,19 +54,19 @@ Clases:
 8  Semana 26/9
 	Examen parcial 
 9  Semana 3/10
-	Virtualización
+	Alta disponibilidad 
 10 Semana 10/10
-	Virtualización / Recuperatorio 
+	Alta disponibilidad / Recuperatorio 
 11 Semana 17/10
-	Virtualización 
+	Alta disponibilidad 
 12 Semana 24/10
-	Alta disponibilidad 
+	Virtualización 
 13 Semana 31/10
-	Alta disponibilidad 
+	Virtualización 
 14 Semana 7/11
-	Alta disponibilidad 
+	Virtualización / Parcial 
 15 Semana 14/11
-	Parcial 
+	A determinar 
 16  Semana 21/11
 	Recuperatorio 
 
