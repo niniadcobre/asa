@@ -1,0 +1,17 @@
+MD - Linux RAID 
+
+https://gist.github.com/ololobus/db9415cd54d0d1410cea
+https://github.com/hunleyd/mdadm_notify/blob/master/mdadm_notify
+https://ubuntuforums.org/showthread.php?t=1494846 >>HUGE and ugly 
+/usr/share/mdadm/checkarray
+
+/etc/init.d/mdadm
+/etc/init.d/mdadm-waitidle
+/etc/init.d/mdadm-raid
+/usr/share/initramfs-tools/scripts/local-top/mdadm
+/usr/share/initramfs-tools/hooks/mdadm
+/usr/share/bug/mdadm/script
+/usr/share/mdadm/mkconf
+/usr/share/mdadm/checkarray
+/usr/share/doc/mdadm/examples/syslog-events
+

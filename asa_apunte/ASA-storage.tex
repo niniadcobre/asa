@@ -19,9 +19,9 @@ Los dispositivos lógicos de bloques están asociados a algún medio de almacena
 \subsection{Temas de práctica}
 \begin{enumerate}
 	\item Crear y destruir particiones con fdisk, parted, gparted. 
-	\item Reconocer tipos de particiones. Comprender la estructura de la tabla de particiones, particiones primarias, extendidas y lógicas.
+	\item Reconocer tipos de particiones. Comprender la estructura de la tabla de particiones. MBR/BIOS particiones primarias, extendidas y lógicas. UEFI/GPT. 
 	\item Comando dd, modificadores bs y count. Copia de dispositivos y archivos.
-	\item Dispositivos /dev/null y /dev/zero. Creación de archivos prealojados. Modificador seek. 
+	\item Dispositivos /dev/null y /dev/zero. Creación de archivos prealojados. Modificador seek. fallocate. 
 	\item Comando mkfs. Tipo de filesystem. Filesystems sobre una partición, sobre un archivo.
 	\item Loop devices. Comando losetup. Comando mount. Opciones ro, loop, offset. Montado de filesystems sobre una partición física, sobre un archivo, sobre una partición en una imagen de disco.
 	\item Redimensionamiento de filesystems. Comando dd y modificador conv=notrunc. Comando resize2fs. Opciones relacionadas con filesystems en parted.
@@ -103,6 +103,6 @@ Filesystem      Size  Used Avail Use% Mounted on
 
 \input{ASA-RAID}
 
-\input{ASA-LVM}
+%\input{ASA-LVM}
 
-\input{ASA-Smart}
+%\input{ASA-Smart}

@@ -1,0 +1,16 @@
+#############################
+# ASA - 2016 - Almacenamiento
+#############################
+
+1) Crear un script que genere n archivos de un tamaño fijo, y los asocie a 
+loop devices. El número de archivos y su tamaño deben recibirse como argumento
+de entrada. 
+
+2) Crear en una tabla de particiones tipo MBR (IBM PC) sobre un dispositivo 
+loop. Copiar la tabla de particiones a un archivo, destruir la tabla anterior
+y restaurarla. Escriba el procedimiento paso a paso. 
+
+3) Crear una tabla de particiones tipo GPT. Destruir la tabla principal y 
+restaurarla del backup que la misma establece. 
+
+
