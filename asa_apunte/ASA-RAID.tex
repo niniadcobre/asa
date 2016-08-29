@@ -108,6 +108,8 @@ mdadm --examine /dev/sdc
 mdadm --query --detail /dev/md0
 \end{lstlisting}
 
+La opción detail actúa sobre arrays, mientras que la opción examine se refiere a los dispositivos subyacentes.
+
 Crear script de alerta
 \begin{lstlisting}
 cat > /root/raidalert
@@ -156,10 +158,13 @@ cat /proc/mdstat
 cat /root/alert
 \end{lstlisting}
 
-Destruir el array
+Desactivar el array
 \begin{lstlisting}
 mdadm --stop /dev/md0
 \end{lstlisting}
+
+En este último paso se detiene el array, sin embargo la información aún persiste en los dispositivos lo que posibilita la re-construcción del mismo en caso de ser necesario (modo assemble). Para eliminar la información 
+referente al array, almacenada en cada componente del mismo, se proveen herramientas específicas: ver zero-superblock en el manual en línea. 
 
 \subsection {Temas de práctica}
 \begin{enumerate}
