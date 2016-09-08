@@ -1,11 +1,16 @@
-\section{Backups}
-\subsection{Decisiones sobre los respaldos}
+\section{Copias de resguardo}
+\subsection{Establecimiento de una política institucional}
+La estrategia de copias de resguardo (backup en inglés)  implica mucho más que la decisión 
+de qué herramienta particular utilizar (tar, rsync, etc.)  y dónde almacenar las copias.  A continuación 
+se enumeran algunos de los aspectos principales que el administrador deberá contemplar a la hora de definir 
+la política de copias de respaldo de la organización.
+
 \begin{itemize}
 	\item Propósitos y requerimientos legales, confidencialidad, etc.
 	\item Archivos a respaldar 
 	\begin{itemize}
 		\item Archivos de sistema, de los usuarios, de las aplicaciones
-		\item Vuelcos de bases de datos, formatos portables
+		\item Vuelcos de bases de datos, formatos portables.
 	\end{itemize}	
 	\item Dinámica de los archivos
 	\begin{itemize}
@@ -31,6 +36,7 @@
 		\item Costo en tiempo de respaldo
 		\item Costo en tiempo de restauración
 		\item Costo monetario por byte de almacenamiento 
+		\item Disponibilidad tecnológica
 	\end{itemize}
 	\item Presupuesto en medios
 	\item Herramienta y formato (ftp, sftp, scp, tar, cpio, rsync, dd...)  
@@ -44,8 +50,6 @@
 	\end{itemize}
 	\item ¿Cómo escala la solución? ¿Se adapta al crecimiento de los datos?
 \end{itemize}
-
-
 
 \section{Sincronización de archivos}
 
@@ -141,11 +145,28 @@ total 4104
 \end{lstlisting}
 
 \section{Replicación de datos} 
-Más allá de las diferentes alternativas para realizar la copia periódica de archivos, con una u otra herramienta, está el concepto de replicación de información. Su propósito es diferente del de la copia de resguardo. En lugar de proteger los datos, manteniendo una historia de copias a través del tiempo, la replicación busca aumentar la disponibilidad de los datos, manteniendo dos imágenes iguales en dos lugares de almacenamiento. 
+Más allá de las diferentes alternativas para realizar la copia periódica de archivos, 
+con una u otra herramienta, está el concepto de replicación de información. Su propósito 
+es diferente del de la copia de resguardo. En lugar de proteger los datos, manteniendo una 
+historia de copias a través del tiempo, la replicación busca aumentar la disponibilidad 
+de los datos, manteniendo dos imágenes iguales en dos lugares de almacenamiento. 
 
-Esta forma de tratamiento de la información no protege de pérdidas o errores, pero facilita el rápido regreso a la operación de un sistema ante fallas de hardware. La replicación puede ser asimétrica (es decir, una copia es master y la segunda recibe las modificaciones), o simétrica (ambas copias reciben las modificaciones de la otra); y puede ser continua (disparada por eventos de filesystem) o administrativa (accionada por el administrador). El regreso a la operación de un sistema con fallos puede ser un proceso manual, como en el caso de clonar sobre \emph{bare metal} un sistema completo cuyo hardware ha quedado inutilizado, o automático, como en los clusters de Alta Disponibilidad.
+Esta forma de tratamiento de la información no protege de pérdidas o errores, pero facilita 
+el rápido regreso a la operación de un sistema ante fallas de hardware. La replicación puede ser:
+\begin{itemize} 
+   \item {\bf Asimétrica}: una copia es la copia maestra y la segunda recibe las modificaciones, ó {\bf simétrica}: ambas copias reciben las modificaciones de la otra;
+   \item {\bf Continua}: disparada por eventos de filesystem, o {\bf administrativa}: accionada por el administrador. 
+\end{itemize}
 
-Herramientas que permiten ejecutar replicación, con diferentes alcances y objetivos, son los utilitarios rsync, csync2, unison (que utilizan el algoritmo de rsync), los sistemas de control de versiones como git o Subversion, filesystems distribuidos como Lustre o GlusterFS, los sistemas de almacenamiento en nube con clientes automáticos, como Dropbox o Owncloud, la clonación de máquinas virtuales, y el dispositivo de bloques replicado DRBD. 
+El regreso a la operación de un sistema con fallos puede ser un proceso manual, como en el caso 
+de clonar sobre \emph{bare metal} (hardware desnudo) un sistema completo cuyo hardware ha quedado 
+inutilizado, o automático, como en los clusters de Alta Disponibilidad.
+
+Herramientas que permiten ejecutar replicación, con diferentes alcances y objetivos, son los utilitarios 
+rsync, csync2, unison (que utilizan el algoritmo de rsync), los sistemas de control de versiones 
+como git o Subversion, filesystems distribuidos como Lustre o GlusterFS, los sistemas de 
+almacenamiento en nube con clientes automáticos, como Dropbox o Owncloud, la clonación de 
+máquinas virtuales, y el dispositivo de bloques replicado DRBD. 
 
 \subsection{Replicación con rsync}
 
