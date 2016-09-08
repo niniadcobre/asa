@@ -27,6 +27,7 @@ Total semanas: 16
 
 Feriados 
 Lunes     15/08 Paso a la inmortalidad José de San Martín (17/10)
+Lunes     12/09 Aniversario de Neuquén 
 Sábado    17/09 Día del profesor
 Miércoles 21/09 Día del estudiante
 Lunes     10/10 Día de respeto a la diversidad cultural (12/10)
@@ -53,7 +54,7 @@ Clases:
 7  Semana 19/9
 	Estrategias de respaldo
 8  Semana 26/9
-	Examen parcial 
+	Examen parcial  --> 29/9 PRIMER EXAMEN PARCIAL 
 9  Semana 3/10
 	Alta disponibilidad 
 10 Semana 10/10
