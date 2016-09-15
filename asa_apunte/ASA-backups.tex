@@ -1,6 +1,6 @@
-\section{Copias de resguardo}
-\subsection{Establecimiento de una política institucional}
-La estrategia de copias de resguardo (backup en inglés)  implica mucho más que la decisión 
+\section{Copias de respaldo}
+\subsection{Establecimiento de una política de copias de respaldo}
+La estrategia de copias de respaldo (backup en inglés)  implica mucho más que la decisión 
 de qué herramienta particular utilizar (tar, rsync, etc.)  y dónde almacenar las copias.  A continuación 
 se enumeran algunos de los aspectos principales que el administrador deberá contemplar a la hora de definir 
 la política de copias de respaldo de la organización.
@@ -55,7 +55,7 @@ la política de copias de respaldo de la organización.
 
 \subsection{Herramienta rsync}
 
-Rsync es un comando de sincronización de directorios y archivos. Puede usarse básicamente como un reemplazo de los comandos rcp o scp, pero presenta gran cantidad de opciones interesantes. Entre otras cosas, utiliza un algoritmo propio para computar las diferencias entre los archivos origen y destino antes de iniciar la copia, y transfiere únicamente las modificaciones. Es decir, para aquellos archivos que son diferentes entre origen y destino, únicamente copia aquellos bloques de datos que son efectivamente diferentes.  
+Rsync es un comando de sincronización de directorios y archivos. Puede usarse básicamente como un reemplazo de los comandos rcp o scp, pero presenta gran cantidad de opciones interesantes. Entre otras cosas, utiliza un algoritmo propio para computar las diferencias entre los archivos origen y destino antes de iniciar la copia, y transfiere únicamente las modificaciones. Es decir, para aquellos archivos que son diferentes entre origen y destino, únicamente copia aquellos bloques de datos que son efectivamente diferentes\footnote{https://rsync.samba.org/tech\_report/}.
 
 Las opciones de rsync son muy numerosas (ver Anexo \ref{sec:rsync}). Algunas de las más utilizadas:
 
@@ -116,7 +116,7 @@ drwxrwxr-x  2 oso oso 4096 Aug  5 11:28 xmms
 \end{lstlisting}
 
 \subsubsection{Modo backup}
-El modo backup de rsync hace que los archivos preexistentes en el destino sean renombrados cada vez que se reemplazan o se borran. La opción --backup-dir controla dónde serán creadas estas copias de backup con nuevos nombres. La opción --backup-suffix indica qué extensión tendrán estos archivos (por defecto se agrega un signo \quotes{\textasciitilde}).
+El modo backup de rsync hace que los archivos preexistentes en el destino sean renombrados cada vez que se reemplazan o se borran. La opción --backup-dir controla dónde serán creadas estas copias de backup con nuevos nombres. La opción --suffix indica qué extensión tendrán estos archivos (por defecto se agrega un signo \quotes{\textasciitilde}).
 En el caso anterior, supongamos que luego de hacer la copia, se modifican los archivos presentes en xmms.
 
 \begin{lstlisting}
@@ -147,7 +147,7 @@ total 4104
 \section{Replicación de datos} 
 Más allá de las diferentes alternativas para realizar la copia periódica de archivos, 
 con una u otra herramienta, está el concepto de replicación de información. Su propósito 
-es diferente del de la copia de resguardo. En lugar de proteger los datos, manteniendo una 
+es diferente del de la copia de respaldo. En lugar de proteger los datos, manteniendo una 
 historia de copias a través del tiempo, la replicación busca aumentar la disponibilidad 
 de los datos, manteniendo dos imágenes iguales en dos lugares de almacenamiento. 
 
@@ -185,14 +185,14 @@ Por supuesto, la opción –delete es peligrosa. Para verificar cuál será el e
 Una extensión de la idea de backup es la de crear imágenes de particiones completas de un sistema, de modo de poder recuperarlo ante fallas generalizadas en menos tiempo y con menos trabajo que una reinstalación. Esta técnica es conveniente para aquellas particiones que alojan filesystems \quotes{de sistema}, es decir, donde los datos son mayormente binarios o archivos de configuración de sistema, que no son afectados por el trabajo cotidiano del usuario.
 
 \subsubsection{Comando dd}
-Una herramienta útil para el resguardo de particiones completas es el utilitario dd. Con él se puede obtener una imagen de una partición o dispositivo completo. 
+Una herramienta útil para el respaldo de particiones completas es el utilitario dd. Con él se puede obtener una imagen de una partición o dispositivo completo. 
 
 \begin{lstlisting}
 dd if=/dev/sda1 of=part1.dd; scp part1.dd serverbackup.ejemplo.com.ar:
 dd if=/dev/fd0 of=diskette.img
 \end{lstlisting}
 
-Un uso alternativo es el resguardo de las tablas de particiones:
+Un uso alternativo es el respaldo de las tablas de particiones:
 
 \begin{lstlisting}
 dd if=/dev/sda of=tpart.dd bs=1K count=1
@@ -208,7 +208,7 @@ cp /mnt/rescate/* /datos
 
 \subsubsection{Comando partimage}
 
-La réplica de particiones con dd, sin embargo, carece de flexibilidad. Los backups son del mismo tamaño que la partición, y son difíciles de manipular. Un utilitario tal como partimage tiene conocimiento del filesystem, copia solamente los bloques en uso del dispositivo, y opcionalmente aplica compresión. Además, puede dividir el resguardo en múltiples archivos para facilitar el almacenamiento. Puede ser usado en volúmenes de los diferentes sistemas de archivos de Linux, tanto como en FAT o NTFS. Tiene un modo interactivo y uno de línea de comandos.
+La réplica de particiones con dd, sin embargo, carece de flexibilidad. Los backups son del mismo tamaño que la partición, y son difíciles de manipular. Un utilitario tal como partimage tiene conocimiento del filesystem, copia solamente los bloques en uso del dispositivo, y opcionalmente aplica compresión. Además, puede dividir el respaldo en múltiples archivos para facilitar el almacenamiento. Puede ser usado en volúmenes de los diferentes sistemas de archivos de Linux, tanto como en FAT o NTFS. Tiene un modo interactivo y uno de línea de comandos.
 
 Tanto partimage como dd tienen limitaciones. No se puede recuperar un backup sobre una partición de tamaño menor que la original. En caso de ser sobre una de tamaño mayor, el espacio sobrante se desaprovecha, salvo que se redimensione el filesystem con una herramienta tal como resize2fs. No es sencillo recuperar selectivamente un conjunto de archivos de una imagen.
 
@@ -228,15 +228,17 @@ El flujo de bytes es emitido por la salida standard del comando dd y entubado a 
 
 \section{Temas de práctica}
 \begin{enumerate}
-	\item ¿Cómo determinar cuánto cambio hay en un filesystem? Diseñe un script que sea capaz de determinar qué archivos han sido modificados y cuánto ha crecido un filesystem entre dos fechas cualesquiera. Diseñe un script que sea capaz de presentar esta información en forma de tabla semanal. 
+%	\item ¿Cómo determinar cuánto cambio hay en un filesystem? Diseñe un script que sea capaz de determinar qué archivos han sido modificados y cuánto ha crecido un filesystem entre dos fechas cualesquiera. Diseñe un script que sea capaz de presentar esta información en forma de tabla semanal. 
 	\item Utilizando rsync, ejecute una transferencia a través de la red, de un archivo de tamaño considerable. Anote el tiempo que registra el programa. Verifique las opciones de compresión que está utilizando su comando.
+	\item Modifique el archivo anterior, realice nuevamente la transferencia. Anote el tiempo que registra el programa. ¿Se transfirió el archivo en su totalidad?
 	\item Repita la experiencia utilizando scp. Verifique las opciones de compresión de modo que la comparación sea justa. Puede usar el comando time para obtener el tiempo real de ejecución. Compare los tiempos. 
 	\item Repita una vez más la transferencia utilizando rsync, sin eliminar el archivo ya copiado en su lugar de destino. Repita con scp y compare los tiempos.
-	\item Prepare un directorio con uno o dos niveles de subdirectorios. Guarde archivos de tamaño considerable en esa estructura. Repita el experimento anterior con rsync y con scp, registrando tiempos. Luego modifique un único carácter de un único archivo de la jerarquía, repitiendo la transferencia con ambas herramientas y registrando tiempos.
+	\item Prepare un directorio con uno o dos niveles de subdirectorios. Guarde archivos de tamaño considerable en esa estructura. Repita el experimento anterior con rsync y con scp, registrando tiempos. Luego modifique un único caracter de un único archivo de la jerarquía, repitiendo la transferencia con ambas herramientas y registrando tiempos.
 	\item Clasifique en simétrica/asimétrica, continua/administrativa, la replicación ejecutada por herramientas como rsync, csync2, unison, git, Subversion, Lustre, GlusterFS, Dropbox, Owncloud, la clonación de máquinas virtuales, y el dispositivo de bloques replicado DRBD. ¿De qué forma ayuda cada una a recuperar la operatividad de un equipo en caso de fallo?	
 	\item Cuando rsync utiliza ssh como transporte, se adapta a la política de autenticación de usuarios que utiliza ssh. ¿Cómo se puede evitar que rsync pida password de usuario para ejecutar una transferencia entre diferentes hosts?
 	\item Prepare un script para replicar un directorio junto con sus subdirectorios, usando rsync, en otro host. Instale el script en crontab. Verifique su funcionamiento modificando los contenidos del directorio.
 	\item Modifique el script anterior para utilizar el modo backup de rsync en lugar de replicar el directorio.
 	\item ¿De qué forma, y en qué casos, puede ser de ayuda la herramienta \lstinline$anacron$ en lugar de \lstinline$cron$? 
 	\item Utilice el comando partimage para obtener una imagen de una partición de su sistema. Aplíquela sobre otro disco. ¿Cómo se puede verificar que la replicación ha sido correcta? 
+	\item ¿Tiene sentido el uso de la opción de compresión cuando trabajamos con rsync localmente?
 \end{enumerate}
