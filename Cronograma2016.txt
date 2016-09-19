@@ -50,7 +50,7 @@ Clases:
 5  Semana 5/9
 	Almacenamiento  
 6  Semana 12/9
-	Estrategias de respaldo
+	Asueto y clase suspendida :(
 7  Semana 19/9
 	Estrategias de respaldo
 8  Semana 26/9
