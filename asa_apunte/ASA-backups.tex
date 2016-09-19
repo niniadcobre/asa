@@ -76,7 +76,7 @@ rsync -av \                             # modo archive y modo verbose
 La opción -a funciona como sinónimo de un conjunto de otras opciones convenientes para las copias de respaldo en general. Esta opción equivale a -rlptgoD, que se traduce como r=recursivo; l=respetar los links simbólicos; p=preservar los permisos, t=los tiempos de acceso de los archivos, g=el grupo y o=el dueño; y D=recrear los pseudoarchivos de dispositivos en el lado destino. La compresión de archivos será conveniente cuando origen y destino se sitúen en equipos diferentes sobre la red.
 
 
-Rsync puede usarse de muchas formas:
+Rsync puede usarse de muchas formas (man rsync), algunas de ellas:
 \begin{itemize}
 	\item Copia de archivos locales, cuando ninguno de los elementos origen y destino contiene un separador \emph{dos puntos} (\quotes{:}).
 	\item Copia entre host local y host remoto usando un shell remoto (por defecto, ssh) como transporte, cuando el destino contiene \quotes{:}.
@@ -182,7 +182,10 @@ Por supuesto, la opción –delete es peligrosa. Para verificar cuál será el e
 
 \subsection{Replicación de particiones}
 
-Una extensión de la idea de backup es la de crear imágenes de particiones completas de un sistema, de modo de poder recuperarlo ante fallas generalizadas en menos tiempo y con menos trabajo que una reinstalación. Esta técnica es conveniente para aquellas particiones que alojan filesystems \quotes{de sistema}, es decir, donde los datos son mayormente binarios o archivos de configuración de sistema, que no son afectados por el trabajo cotidiano del usuario.
+Una extensión de la idea de backup es la de crear imágenes de particiones completas de un sistema, de modo de poder recuperarlo ante fallas generalizadas en menos tiempo y con menos trabajo que una reinstalación. Esta técnica es conveniente para aquellas particiones que alojan filesystems \quotes{de sistema}\footnote{
+Es conveniente probar la técnica al menos una vez para el sistema en cuestión, 
+ya que en algunos sistemas modernos podría no funcionar al reemplazar el 
+hardware por uno diferente.}, es decir, donde los datos son mayormente binarios o archivos de configuración de sistema, que no son afectados por el trabajo cotidiano del usuario.
 
 \subsubsection{Comando dd}
 Una herramienta útil para el respaldo de particiones completas es el utilitario dd. Con él se puede obtener una imagen de una partición o dispositivo completo. 
@@ -192,7 +195,7 @@ dd if=/dev/sda1 of=part1.dd; scp part1.dd serverbackup.ejemplo.com.ar:
 dd if=/dev/fd0 of=diskette.img
 \end{lstlisting}
 
-Un uso alternativo es el respaldo de las tablas de particiones:
+Un uso alternativo es el respaldo de las tablas de particiones (siempre y cuando estemos hablando de particiones de tamaño y posición fija como MBR/msdos):
 
 \begin{lstlisting}
 dd if=/dev/sda of=tpart.dd bs=1K count=1
@@ -241,4 +244,5 @@ El flujo de bytes es emitido por la salida standard del comando dd y entubado a 
 	\item ¿De qué forma, y en qué casos, puede ser de ayuda la herramienta \lstinline$anacron$ en lugar de \lstinline$cron$? 
 	\item Utilice el comando partimage para obtener una imagen de una partición de su sistema. Aplíquela sobre otro disco. ¿Cómo se puede verificar que la replicación ha sido correcta? 
 	\item ¿Tiene sentido el uso de la opción de compresión cuando trabajamos con rsync localmente?
+	\item Utilizando netcat y tar {\bf sin archivo intermedio} transfiera un directorio y su contenido a un host remoto. 
 \end{enumerate}
