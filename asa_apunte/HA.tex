@@ -1,13 +1,26 @@
 \section{Conceptos de Disponibilidad}
-\begin{itemize}
-	\item Fallos
-	\item Modos de fallo
+
+	
+\subsubsection*{Fallos}  
+	Un sistema falla cuando no cumple su especificación. Los fallos de un sistema pueden estar en un fallo en algún componente. Los {\bf fallos de componentes} pueden ser: 
 	\begin{itemize}
-		\item Fallo silencioso: El sistema deja de cumplir su función sin notificarlo
-		\item Fallo bizantino: El sistema sigue cumpliendo su función en forma incorrecta
-		\item Modo Fail-stop: Al fallar, el sistema deja de funcionar
+	\item Fallos transitorios: Rayos cósmicos que provocan algún desperfecto momentáneo en el procesador; un mensaje de red no llega a destino pero sí lo hace al re-transmitir. 
+	\item Fallos intermitentes: mal contacto en un cable. 
+	\item Fallos permanentes: circuito quemado, error de software (bug).
 	\end{itemize}
-	\item Tolerancia a fallos: Propiedad que permite a un sistema continuar operando correctamente ante fallos de algunos de sus componentes	
+	
+	Cualquiera de estos fallos puede ser clasificado como un {\bf fallo silencioso} (también conocido como fail-stop) ó un {\bf fallo bizantino}. Un fallo silencioso es aquel en el que el componente fallido deja de funcionar, sin producir resultados erróneos. Más precisamente, o bien no produce salida o, dicha salida indica claramente que el componente ha fallado. Por otra parte, un fallo bizantino se da cuando el componente falla sin detenerse pero produce resultados erróneos (el sistema cumple su función de forma incorrecta). Este último tipo de fallos es claramente más complejo de identificar y solucionar. 
+
+{\bf Tolerancia a fallos}: propiedad que permite a un sistema continuar operando correctamente ante fallos de algunos de sus componentes. En este caso se 
+asume que el sistema puede fallar y se diseña el sistema para ello. Por ejemplo, el RAID 1 (espejado) es un ejemplo de un diseño tolerante a fallas para el 
+almacenamiento masivo. 
+
+\subsubsection*{Disponibilidad}
+A continuación se presentan una serie de expresiones matemáticas relativas al 
+concepto de disponibilidad. 
+
+\begin{itemize}	
+
 	\item Cada sistema existe sobre un continuo de tiempo dividido en Tiempo entre Fallas (TTF) y Tiempo de Reparación (TTR). 
 	\begin{itemize}
 		\item MTBF (\textit{Mean Time Between Failures}), tiempo promedio entre fallos.
@@ -20,18 +33,25 @@
 		\item La selección de sistemas confiables a nivel de hardware apunta a aumentar el MTBF. 
 		\item La implementación de técnicas de Alta Disponibilidad pretende reducir lo más posible los períodos de carencia de los servicios o TTR, por lo tanto el MTTR. 
 		\item En esta fórmula se consideran únicamente los tiempos de carencia del servicio \textit{no planificados}.
+
 	\end{itemize}
-	\item Paradas planificadas
+	\end{itemize}
+
+Existen situaciones en las que es necesario planificar una parada de servicio. Por ejemplo, algunas actualizaciones de sistemas, backups o cambios de configuración pueden requerir de una parada del servicio. Estas {\bf paradas planificadas} no son consideradas dentro de la medición anterior. En general este tipo de 
+paradas se acuerdan previamente con los usuarios del servicio para reducir 
+el impacto. Se establecen los caminos de acción y de recuperación en caso de
+ocurrir fallas no esperadas durante el procedimiento realizado, además de 
+proveer una ventana de tiempo estimada en la que se restaura el servicio. 
+
+Dentro de las {\bf paradas no planificadas} podemos distinguir:
 	\begin{itemize}		
-		\item Backups, instalación de patches, upgrades
+		\item Recuperables: situaciones en que la intervención de los 
+administradores permite re-establecer el servicio en un período de tiempo acotado. Por ejemplo: error de la aplicación, error del operador, apagones, caídas de red, fallas de hardware. 
+		\item Desastres: de menor probabilidad pero de mayor impacto si 
+no se toman medidas adicionales a las convencionales. Por ejemplo: accidentes, robos, sabotajes, incendios, meteoros, catástrofes naturales. 
+
 	\end{itemize}
-	\item Paradas no planificadas
-	\begin{itemize}		
-		\item Recuperables: Error de la aplicación, error del operador, apagones, caídas de red, fallas de hardware
-		\item Desastres: Accidentes, robos, sabotajes, incendios, meteoros, catástrofes naturales
-	\end{itemize}
-	\item La no disponibilidad tiene generalmente un costo para la organización, y puede controlarse con medidas especiales.
-\end{itemize}
+	La no disponibilidad tiene generalmente un costo para la organización, y puede controlarse con medidas especiales.
 
 \subsection{Alta Disponibilidad}
 
