@@ -58,7 +58,7 @@ Para los clusters construidos sobre redes locales (i.e. sobre redes de baja late
 				\item Tecnologías iSCSI, Fibre Channel
 			\end{itemize}
 		\end{itemize}
-		\item \textit{Heartbeats, Quorum, Fencing, Split Brain, STONITH}
+		\item \textit{Heartbeats, Quorum, Fencing, Split Brain, Amnesia, STONITH}
 		\begin{itemize}
 			\item Los nodos de un cluster comprueban que pueden alcanzar a sus peers usando mensajes cortos y periódicos llamados latidos (\textit{heartbeats}).
 			\item Si un nodo sufriera un fallo de red, dejaría de alcanzar a un peer y podría llegar erróneamente a la conclusión de que ha caído. Para separar este falso positivo de falla, los nodos siguen protocolos distribuidos que comprueban que son capaces de alcanzar a otros, y además algunos protocolos consultan a otros nodos si pueden alcanzar a los terceros, sospechosos de fallo. Cuando existe una cantidad suficiente de nodos que están de acuerdo sobre el estado de pertenencia de los demás miembros del cluster, se dice que existe \textit{quorum}, y sólo en ese caso se toman ciertas acciones.
@@ -66,6 +66,7 @@ Para los clusters construidos sobre redes locales (i.e. sobre redes de baja late
 
 			\item En clusters de más de dos nodos, al perderse contacto con un nodo, el resto del cluster cae en la incertidumbre sobre su estado. Cuando existe almacenamiento compartido, una falla del nodo podría afectar a los servicios del cluster. Para evitarlo, el cluster utiliza algún mecanismo de \textit{fencing} (separar por la fuerza al nodo presuntamente fallado). Por lo general estos mecanismos se basan en dispositivos que controlan físicamente la alimentación de los nodos. 
 			\item Cuando se pierde comunicación con un nodo por una cantidad de tiempo determinada, el agente de comunicaciones, que vigila la pertenencia al cluster, debe accionar el dispositivo de fencing y provocar una acción de \textit{STONITH (shoot the other node in the head)}, apagándolo. Cuando no existe un dispositivo, sino que es el administrador del cluster quien debe dar de baja manualmente al nodo fallado, se dice que el dispositivo es de tipo \textit{meatware STONITH} (\smiley{}).
+			\item En un cluster de dos o más nodos, puede suceder que caigan todos los nodos en un determinado orden: digamos A, y luego B (asumiendo dos nodos). En esta situación, el último estado consistente del cluster fue conocido por el nodo A (dicho estado se encuentra en la configuración interna del nodo). Por lo que el nodo B, no estará al tanto de ese último estado del cluster. Si el nodo B intentara unirse al cluster sin la presencia del nodo A, este podría dañar al cluster debido a su desconocimiento de lo hecho por A previo a su caída. Esta situación se conoce como Amnesia del nodo B, y debe ser controlada por el cluster mediante algún mecanismo. En general, se prohibirá al nodo B unirse al cluster hasta en tanto el nodo A retome la operación.   
 		\end{itemize}
 	\end{itemize}
 	\item Herramientas
