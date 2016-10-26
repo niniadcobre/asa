@@ -62,13 +62,13 @@ Clases:
 11 Semana 17/10
 	Alta disponibilidad 
 12 Semana 24/10
-	Virtualización 
+	Lunes y Martes Asueto por temporal, Jueves clases HA. 
 13 Semana 31/10
-	Virtualización 
+	Alta Disponibilidad  (entrega TP obligatorio)
 14 Semana 7/11
-	Virtualización / Parcial 
+	Alta Disponibilidad - Parcial 
 15 Semana 14/11
-	A determinar 
+	Virtualización 
 16  Semana 21/11
 	Recuperatorio 
 
