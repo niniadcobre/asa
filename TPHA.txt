@@ -1,0 +1,37 @@
+HA - TP01
+ASA - TUASSL 2016
+
+Preguntas hasta 2.4.2
+1) Cuál es el archivo que identifica la versión de Centos del sistema. 
+2) ¿Comparable a qué software de debian es yum?
+3) ¿Utiliza systemd o init? 
+4) ¿Cómo verifica que los nodos están efectivamente sincronizando con NTP? 
+5) ¿Qué comandos utiliza para iniciar y habilitar el servicio de NTP?
+6) Para qué sirve cada uno de los paquetes instalados en la sección 2.5. Obtenga la información usando comandos del sistema. 
+7) ¿Cuál es la diferencia entre el método utilizado en 2.4.2 y el uso de ssh-key-gen y ssh-copy-id?
+8)¿Para qué sirven los comandos screen y nohup?
+9)¿Cómo verifica que determinado paquete ya se encuentra instalado?
+
+
+Preguntas hasta 2.6.3
+10) ¿Existen nuevos servicios relacionados al software instalado en 2.5?
+11) ¿Qué repositorios están configurados en cada nodo?
+12) Una vez instalado el software de cluster ¿cómo puede verificar los nuevos servicios del sistema?
+13) En la sección 2.6 indica hacer cambios en el firewall. ¿Por qué cree que es necesario?¿Cómo puede darse cuenta qué firewall se encuentra en uso? ¿Qué puertos son requeridos para el cluster? 
+14) Sobre el software pcs, en la sección 2.6.2. ¿Cuál es el shell de la cuenta de usuario creada para los fines de pcs?¿Qué efecto tiene dicho shell? 
+¿Hay otros usuarios con ese shell definido?
+15) ¿Cuál es el objetivo del link simbólico creado en la sección 2.6.2?
+16) Observe el archivo de configuración creado por pcs para Corosync
+
+Preguntas a partir de sección 3 y hasta 5.1 (no proceder con 5.2 aún 27/10)
+17) Una vez iniciado los servicios de cluster con pcs verifique el estado de los servicios involucrados con systemctl. Guarde las salidas: observe errores e información provista por los servicios. Sobre qué aspectos del cluster proveen información los servicios. 
+18) Reinicie los nodos y verifique que los servicios no se encuentran en ejecución. Reinicie los servicios esta vez utilizando systemctl. 
+19) Ejecute las verificaciones en las secciones 4.2 y 4.3 en ambos nodos, observe diferencias. 
+20) En la sección 4.3 identifique cada uno de los procesos hijos de pacemakerd. Investigue su funcionalidad brevemente para entender qué parte del cluster implementan. 
+21) ¿A qué paquete pertenece el comando journalctl? ¿Los errores pertenecen todos a STONITH?
+22) Observe el log de Corosync
+
+Recursos a partir de 5.2 
+23) Los recursos del cluster son la razón de ser del cluster. Son los servicios altamente disponibles. Existen distintas formas de definir los servicios y darle herramientas al cluster para controlarlos. Investigue brevemente OCF, LSB y systemd. ¿Estas formas de definir servicios tiene que ver sólo con el cluster? 
+24) Ubique dentro de /usr/lib/ocf/resource.d/ el script correspondiente a la IP
+configurada. Observe brevemente su contenido, en particular las líneas finales que procesan la acción a realizar con el servicio. 
