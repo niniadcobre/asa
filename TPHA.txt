@@ -43,6 +43,7 @@ configurada en 5.2. Observe brevemente su contenido, en particular las líneas f
 30) Una vez creado el recurso http (sección 6.4), OBSERVE en qué nodo se inició el recurso web y dónde se encuentra el recurso IP. 
 31) ¿Qué sucedió con los recursos al establecer la restricción en la sección 6.5? ¿En qué otra situación los recursos se han migrado durante el transcurso de la guía?
 32) Entre la sección 6.5 y 6.8 se establecen restricciones entre los recursos para lograr ciertos efectos. Una vez alcanzada la sección 6.8 revise nuevamente los efectos de cada uno de los pasos realizados a partir de 6.5 
+33) Una vez completada la sección 6.8: realice un failover ida y vuelta, observando el tiempo de downtime del servicio http. 
 
 
 
