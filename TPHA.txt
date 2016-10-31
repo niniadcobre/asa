@@ -31,7 +31,20 @@ Preguntas a partir de sección 3 y hasta 5.1 (no proceder con 5.2 aún 27/10)
 21) ¿A qué paquete pertenece el comando journalctl? ¿Los errores pertenecen todos a STONITH?
 22) Observe el log de Corosync
 
-Recursos a partir de 5.2 
+Recursos a partir de 5.2 a 6.8 (inclusive)
 23) Los recursos del cluster son la razón de ser del cluster. Son los servicios altamente disponibles. Existen distintas formas de definir los servicios y darle herramientas al cluster para controlarlos. Investigue brevemente OCF, LSB y systemd. ¿Estas formas de definir servicios tiene que ver sólo con el cluster? 
-24) Ubique dentro de /usr/lib/ocf/resource.d/ el script correspondiente a la IP
-configurada. Observe brevemente su contenido, en particular las líneas finales que procesan la acción a realizar con el servicio. 
+24) Ubique dentro de /usr/lib/ocf/resource.d/ el script correspondiente a la IP 
+configurada en 5.2. Observe brevemente su contenido, en particular las líneas finales que procesan la acción a realizar con el servicio. 
+25) Observe el estado del cluster y la nueva IP configurada en la interfaz de red eth0 (comando ip). 
+26) En la sección 5.3 antes de realizar el failover observe el estado del recurso creado, y mantenga un ping desde un lugar remoto para observar lo que sucede con el recurso. ¿Cuán apreciable es el tiempo de downtime del recurso?
+27) ¿A qué recursos afecta el resource-stickiness configurado en 5.4?
+28) Lea atentamente y comente la nota que dice "Important" en la sección 6.1. Verifique el estado del servicio httpd. 
+29) Ubique y revise brevemente el script que utiliza el cluster para administrar el recurso apache en la sección 6.4. 
+30) Una vez creado el recurso http (sección 6.4), OBSERVE en qué nodo se inició el recurso web y dónde se encuentra el recurso IP. 
+31) ¿Qué sucedió con los recursos al establecer la restricción en la sección 6.5? ¿En qué otra situación los recursos se han migrado durante el transcurso de la guía?
+32) Entre la sección 6.5 y 6.8 se establecen restricciones entre los recursos para lograr ciertos efectos. Una vez alcanzada la sección 6.8 revise nuevamente los efectos de cada uno de los pasos realizados a partir de 6.5 
+
+
+
+
+
