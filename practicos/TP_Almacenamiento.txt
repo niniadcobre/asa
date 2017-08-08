@@ -1,15 +1,15 @@
-#############################
-# ASA - 2016 - Almacenamiento
-#############################
+######################################
+# ASA - 2017 - Almacenamiento - PARTE1
+######################################
 
 0) Reproducir en una terminal paso a paso la secuencia de comandos presentada
-en el apunte de cátedra para Loop devices (página 15). 
+en el apunte de cátedra para "Loop devices" (Configuraciones de almacenamiento) 
 
 1) Crear un script que genere n archivos de un tamaño fijo, y los asocie a 
 loop devices. El número de archivos y su tamaño deben recibirse como argumento
 de entrada. 
 
-2) Crear en una tabla de particiones tipo MBR (IBM PC) sobre un dispositivo 
+2) Crear en una tabla de particiones tipo msdos (IBM PC) sobre un dispositivo 
 loop. Copiar la tabla de particiones a un archivo, destruir la tabla anterior
 y restaurarla. Escriba el procedimiento paso a paso. Observe el cambio del 
 contenido del dispositivo antes y después (hexdump) 
@@ -35,5 +35,16 @@ de archivos?
 9) ¿Es posible crear un archivo disperso mayor al tamaño total del sistema de 
 archivos?
 
-10) Desarrolle un script que ubique potenciales archivos dispersos en un directorio. 
+10) Explique el efecto de de la opción conv=notrunc de dd en la siguiente 
+secuencia.
+
+$ dd if=/dev/urandom of=junk.txt bs=1024 count=1
+$ dd if=/dev/urandom of=junk.txt bs=512 count=1 conv=notrunc
+$ dd if=/dev/urandom of=junk.txt bs=512 count=1
+
+   a) ¿Qué tipo de archivo es junk.txt? ¿Cuál es su contenido?
+   b) ¿Qué tipo de archivo es /dev/urandom? ¿Para qué sirve? Compare con 
+      /dev/zero. 
+
+
 
