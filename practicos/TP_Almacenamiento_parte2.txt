@@ -20,4 +20,12 @@ con al menos:
 3) ¿Dónde se almacena la información acerca del array? 
 
 4) ¿Es posible trasladar un array entre dos máquinas? ¿Qué se necesita? Escriba
-un procedimeinto y realice la prueba. 
+un procedimiento y realice la prueba. 
+
+5) ¿Dónde se almacena la información (metadatos) que md crea sobre 
+los arrays?
+
+6) ¿Cuáles son las piezas de software involucradas en la administración de
+arrays creados con Linux md? ¿Alcanza con el driver del kernel? ¿Existen 
+archivos de configuración?¿Hay servicios relacionados?¿Qué sucede con los
+dispositivos array al iniciar el sistema?
