@@ -35,12 +35,12 @@ PREGUNTAS HASTA 2.4.2
 
 PREGUNTAS DESDE 2.5 HASTA 2.6.3
 0. Guarde toda la salida de la instalación de paquetes propuesta en 2.5
-1. Indique brevemente para qué sirve cada uno de los paquetes instaladoss en 2.5. 
+1. Indique brevemente para qué sirve cada uno de los paquetes instalados en 2.5. 
    Obtenga la información usando comandos del sistema. 
 2. Liste y OBSERVE el contenido de los paquetes instalados en la sección 2.5
 3. ¿Existen nuevos servicios relacionados al software instalado en 2.5?
 4. Una vez instalado el software de cluster ¿cómo puede verificar los nuevos servicios del sistema?
-5. ¿Cuál es el objetivo del link simbólico creado en la sección 2.6.2?
+5. ¿Cuál es el objetivo del enlace simbólico creado en la sección 2.6.2?
 6. En la sección 2.6 indica hacer cambios en el firewall. ¿Por qué 
    cree que es necesario?¿Cómo puede darse cuenta qué firewall se 
    encuentra en uso? ¿Qué puertos son requeridos para el cluster? 
@@ -50,45 +50,73 @@ PREGUNTAS DESDE 2.5 HASTA 2.6.3
    ¿Hay otros usuarios con ese shell definido?
 8. En la sección 2.6.3 los comandos se ejecutan en un sólo nodo. 
    ¿Por qué? ¿Cuál es la función del comando pcs?
-9. Guarde la salida del comando pcs cluster setup
+9. Guarde la salida del comando pcs cluster setup. Observe la salida del comando "pcs status". 
+   ¿Se encuentra el software de cluster ejecutándose en esta instancia? ¿Qué tarea realizó?
 8. Observe el archivo de configuración creado por pcs para Corosync. 
    ¿En qué momento se instaló Corosync?¿Cuál es su función?
 
-
-Preguntas a partir de sección 3 y hasta 5.1 (no proceder con 5.2 aún 27/10)
-1) Una vez iniciado los servicios de cluster con pcs verifique el 
-   estado de los servicios involucrados con systemctl. Guarde las 
-   salidas: observe errores e información provista por los servicios. 
-   Sobre qué aspectos del cluster proveen información los servicios.
- 
-2) Reinicie los nodos y verifique que los servicios no se encuentran 
-   en ejecución. Reinicie los servicios esta vez utilizando systemctl. 
-3) Ejecute las verificaciones en las secciones 4.2 y 4.3 en ambos 
-   nodos, observe diferencias. 
-4) En la sección 4.3 identifique cada uno de los procesos hijos de 
+PREGUNTAS A PARTIR DE SECCIÓN 3 Y HASTA 5.1 (NO PROCEDER CON 5.2)
+0. ¿Es pcs parte del "stack" de cluster (observe los gráficos de la presentación). 
+   ¿Cuál es su función?¿Podemos prescindir de este software?¿Existe algún servicio 
+   o demonio relacionado a pcs?
+1. ¿Qué elementos del cluster permite administrar pcs? Indique brevemente qué es cada 
+   uno de ellos.
+2. Una vez iniciado los servicios de cluster con pcs, verifique el 
+   estado de los mismos con systemctl. Guarde las salidas: observe errores 
+   e información provista por los servicios. ¿Sobre qué aspectos del cluster 
+   proveen información los servicios? Guarde la salida de "pcs status --full"
+3. ¿El inicio de los servicios a través de pcs, habilita (enable) los servicios
+   de modo que estos se inicien automáticamente luego de un reinicio de sistema?
+4. Reinicie los nodos y verifique que los servicios no se encuentran 
+   en ejecución. Reinicie los servicios esta vez utilizando systemctl, verificando
+   el estado de los servicios luego de CADA comando. ¿Por qué es necesario 
+   iniciar primero corosync y luego pacemaker?
+5. Ejecute las verificaciones en las secciones 4.2 y 4.3 en ambos nodos, observe 
+   diferencias. Verifique a qué paquete de software pertenece cada uno de los 
+   comandos de verificación. 
+6. En la sección 4.3 identifique cada uno de los procesos hijos de 
    pacemakerd. Investigue su funcionalidad brevemente para entender 
    qué parte del cluster implementan. 
-5) ¿A qué paquete pertenece el comando journalctl? ¿Los errores 
+7. ¿A qué paquete pertenece el comando journalctl? ¿Los errores 
    pertenecen todos a STONITH?
-6) Observe el log de Corosync
+8. Observe el log de Corosync
+9. Observe la salida de "pcs status --full" ¿Existen _recursos_ configurados hasta
+ el momento?
 
-Preguntas a partir de 5.2 a 6.8 (inclusive)
-1) Los recursos del cluster son la razón de ser del cluster. 
+PREGUNTAS A PARTIR DE 5.2 hasta 5.4 (INCLUSIVE)
+1. Los recursos del cluster son la razón de ser del cluster. 
    Son los servicios altamente disponibles. Existen distintas 
    formas de definir los servicios y darle herramientas al 
    cluster para controlarlos. Investigue brevemente OCF, LSB y systemd. 
    ¿Estas formas de definir servicios tiene que ver sólo con el cluster? 
-2) Ubique dentro de /usr/lib/ocf/resource.d/ el script 
+
+2. Ubique dentro de /usr/lib/ocf/resource.d/ el script 
    correspondiente a la IP configurada en 5.2. Observe brevemente su contenido,
    en particular las líneas finales que procesan la acción a realizar con el servicio. 
-3) Observe el estado del cluster y la nueva IP configurada en la interfaz de red eth0 (comando ip). 
-4) En la sección 5.3 antes de realizar el failover observe el estado del recurso creado, y mantenga un ping desde un lugar remoto para observar lo que sucede con el recurso. ¿Cuán apreciable es el tiempo de downtime del recurso?
-5) ¿A qué recursos afecta el resource-stickiness configurado en 5.4?
-6) Lea atentamente y comente la nota que dice "Important" en la sección 6.1. Verifique el estado del servicio httpd. 
-7) Ubique y revise brevemente el script que utiliza el cluster para administrar el recurso apache en la sección 6.4. 
-8) Una vez creado el recurso http (sección 6.4), OBSERVE en qué nodo se inició el recurso web y dónde se encuentra el recurso IP. 
-9) ¿Qué sucedió con los recursos al establecer la restricción en la sección 6.5? ¿En qué otra situación los recursos se han migrado durante el transcurso de la guía?
-10) Entre la sección 6.5 y 6.8 se establecen restricciones entre los recursos para lograr ciertos efectos. Una vez alcanzada la sección 6.8 revise nuevamente los efectos de cada uno de los pasos realizados a partir de 6.5 
+
+3. Lea brevemente man ocf_heartbeat_IPaddr2. ¿Sobre qué provee información?
+4. ¿Cómo puede obtener el listado de agentes disponibles para systemd en lugar de OCF?
+
+5. Una vez configurado el recurso IP, observe el estado del cluster y la nueva IP configurada 
+   en la interfaz de red (comando ip). ¿En qué nodo se inició el recurso? 
+6. PREVIO a realizar el failover pedido en la sección 5.3, observe el estado del recurso 
+   creado, y mantenga un ping desde un lugar remoto para observar lo que sucede con 
+   el recurso. ¿Cuán apreciable resultó el tiempo de downtime del recurso? 
+7. PREVIO a modificar la propiedad resource-stickiness en 5.4, observe la salida del comando "pcs resource defaults". 
+8. ¿A qué recursos afecta el resource-stickiness configurado en 5.4? ¿Para qué sirve?
+
+Preguntas sección 6
+1. Lea atentamente y comente la nota que dice "Important" en la sección 6.1. Una 
+   vez instalado, verifique el estado del servicio httpd. 
+2. Ubique y revise brevemente el script que utiliza el cluster para administrar el 
+   recurso apache en la sección 6.4. 
+3. Lea brevemente la página man correspondiente al recurso. 
+4. Una vez creado el recurso http (sección 6.4), OBSERVE en qué nodo se inició 
+   el recurso web y dónde se encuentra el recurso IP. ¿Por qué sucede esto?
+5. ¿Qué sucedió con los recursos al establecer la restricción en la sección 6.5? 
+   ¿En qué otra situación los recursos se han migrado durante el transcurso de la guía?
+10) Entre la sección 6.5 y 6.8 se establecen restricciones entre los recursos para lograr 
+   ciertos efectos. Una vez alcanzada la sección 6.8 revise nuevamente los efectos de cada uno de los pasos realizados a partir de 6.5 
 11) Una vez completada la sección 6.8: realice un failover ida y vuelta, observando el tiempo de downtime del servicio http. 
 
 Preguntas sección 7 

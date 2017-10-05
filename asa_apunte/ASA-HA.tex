@@ -1,6 +1,5 @@
 \section{Conceptos de Disponibilidad}
 
-	
 \subsubsection*{Fallos}  
 	Un sistema falla cuando no cumple su especificación. Los fallos de un sistema pueden estar en un fallo en algún componente. Los {\bf fallos de componentes} pueden ser: 
 	\begin{itemize}
@@ -11,9 +10,13 @@
 	
 	Cualquiera de estos fallos puede ser clasificado como un {\bf fallo silencioso} (también conocido como fail-stop) ó un {\bf fallo bizantino}. Un fallo silencioso es aquel en el que el componente fallido deja de funcionar, sin producir resultados erróneos. Más precisamente, o bien no produce salida o, dicha salida indica claramente que el componente ha fallado. Por otra parte, un fallo bizantino se da cuando el componente falla sin detenerse pero produce resultados erróneos (el sistema cumple su función de forma incorrecta). Este último tipo de fallos es claramente más complejo de identificar y solucionar. 
 
+La presencia de un {\bf fallo}, ya sea en el hardware o en el software, deriva en un {̣\bf error} interno en el sistema. El error provee un cierto nivel de información acerca del fallo. Eventualmente, ese error puede provocar una {\bf avería} del sistema que es evidente a los usuarios del mismo. El objetivo será entonces, evaluar posibles fallos, para evitar que los errores deriven en una avería.
+
 {\bf Tolerancia a fallos}: propiedad que permite a un sistema continuar operando correctamente ante fallos de algunos de sus componentes. En este caso se 
 asume que el sistema puede fallar y se diseña el sistema para ello. Por ejemplo, el RAID 1 (espejado) es un ejemplo de un diseño tolerante a fallas para el 
 almacenamiento masivo. 
+
+
 
 \subsubsection*{Disponibilidad}
 A continuación se presentan una serie de expresiones matemáticas relativas al 
@@ -30,10 +33,9 @@ concepto de disponibilidad.
 	\begin{itemize}
 		\item En promedio, $D = MTBF / (MTBF + MTTR)$.
 		\item La disponibilidad se elevará entonces aumentando el MTBF y/o reduciendo el MTTR. 
-		\item La selección de sistemas confiables a nivel de hardware apunta a aumentar el MTBF. 
+		\item La selección de sistemas confiables a nivel de hardware apunta a aumentar el MTBF. Un MTBF mayor implica un menor impacto de MTTR. 
 		\item La implementación de técnicas de Alta Disponibilidad pretende reducir lo más posible los períodos de carencia de los servicios o TTR, por lo tanto el MTTR. 
 		\item En esta fórmula se consideran únicamente los tiempos de carencia del servicio \textit{no planificados}.
-
 	\end{itemize}
 	\end{itemize}
 
@@ -55,14 +57,24 @@ no se toman medidas adicionales a las convencionales. Por ejemplo: accidentes, r
 
 \subsection{Alta Disponibilidad}
 
+Disponibilidad: cualidad de estar disponible. 
+
 Las técnicas de Alta Disponibilidad (\textit{High Availability, HA}) buscan construir un sistema que dé soporte para la provisión de un servicio durante la mayor parte del tiempo que sea posible. Las medidas para lograr esta meta abarcan varios niveles de actividad, y van desde prácticas adecuadas de administración de sistemas, pasando por elecciones especiales de soporte de hardware, políticas de backup, implantación de sistemas especiales de HA con redundancia, hasta la preparación de estrategias de Recuperación de Desastres (\textit{Disaster Recovery}). Las medidas se apoyan unas en otras, y deben ser implementadas en orden creciente de complejidad y costo (Fig. \ref{fig:nivelesha}). 
 
 \figura[15]{nivelesha}{Jerarquía de medidas de disponibilidad}{niveles-ha.pdf}
 
+{\bf Buenas prácticas de administración de sistemas}: toma de decisiones correctas acerca del hardware y software; consolidación de servidores; buenas políticas de  seguridad; sistema de documentación; sistema de control de cambios; cumplimiento de normas y estándares; elección correcta de personal; infraestructura documentada (cmdb); monitorización de la infraestructura; política de actualización y mantenimiento, etc. 
+
+{\bf Discos y volúmenes}: elección de hardware (discos, controladoras, SAN/NAS/DAS, HBAs, etc) ; niveles de RAID; administración flexible del espacio (volúmenes); elección de los sistemas de archivos. 
+
+{\bf Ambiente local}: todo lo relativo al lugar físico donde residen los equipos. Sistema de enfriamiento y des-humidificación; ordenamiento del cableado (pisos técnicos); UPS, baterías; control de acceso físico; limpieza ; rotulación e identificación, etc.
+
+{\bf Administración de clientes}: no esperar nada de los usuarios. Backup de equipos personales, no sólo de servidores. Provisión e imagen lista para re-instalar. Capacitación. Centralizar directorios home, uso a través de la red. Establecer áreas públicas de uso compartido (ej. uso de "la nube"). Uso de clientes livianos (thin clients). Actualizaciones de software.   
+
 Alta disponibilidad \textbf{no es}:
 \begin{itemize}
 	\item Servicio Continuo, donde el usuario no ve interrupciones del servicio.
-	\item Tolerancia a Fallos, que es una característica del hardware redundante y altamente confiable.
+	\item Tolerancia a Fallos, que es una cualidad de un determinado sistema para operar más allá de ciertos fallos previstos.
 	\item Balance de Carga, aunque algunos modelos de HA lo incluyen como beneficio adicional.
 	\item Recuperación de Desastres, donde se supone que existe una pérdida de datos que se debe subsanar.
 \end{itemize}
@@ -74,7 +86,7 @@ El principio fundamental de HA es la eliminación de los puntos únicos de falla
 
 Si un servicio tiene una disponibilidad de 90\% (o sea, una probabilidad de estar disponible igual a 0.9) sobre un período dado, su probabilidad de carencia o no disponibilidad en ese período es $1 - 0.9 = 0.1$. Si el recurso puede implementarse en forma redundante, y suponiendo eventos de fallo independientes, la probabilidad de que dos instancias del recurso estén no disponibles a la vez en ese mismo período es $0.1 * 0.1 = 0.01$; con lo cual la probabilidad de disponibilidad del servicio es ahora $1 - 0.01 = 0.99$, o sea 99\% para dicho período. Al agregarse la segunda instancia de recurso se ha eliminado el SPOF y se ha ganado un orden de magnitud en disponibilidad.
  
-Para ilustración, cuando un servicio tiene una disponibilidad del 99\% por año, esto quiere decir que en promedio la no disponibilidad del servicio ocurrirá durante 3.65 días por año. En cambio, si la disponibilidad es de 99.99\%, el servicio quedará no disponible a lo sumo durante 52.5 min por año.
+Para ilustración, cuando un servicio tiene una disponibilidad del 99\% por año, esto quiere decir que en promedio la no disponibilidad del servicio ocurrirá durante 3.65 días por año. En cambio, si la disponibilidad es de 99.99\%, el servicio quedará no disponible a lo sumo durante 52.5 minutos por año.
 
 La suposición de que los eventos de fallo son independientes se basa en que no existan SPOFs de nivel superior, es decir, anteriores en la cadena de precondiciones para el servicio (por ejemplo, se supone que existen diferentes líneas de alimentación eléctrica). No es posible construir un sistema completo sin ningún SPOF, pero es posible delimitar ámbitos de responsabilidad donde no existan.
 
