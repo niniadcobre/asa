@@ -105,7 +105,7 @@ PREGUNTAS A PARTIR DE 5.2 hasta 5.4 (INCLUSIVE)
 7. PREVIO a modificar la propiedad resource-stickiness en 5.4, observe la salida del comando "pcs resource defaults". 
 8. ¿A qué recursos afecta el resource-stickiness configurado en 5.4? ¿Para qué sirve?
 
-Preguntas sección 6
+PREGUNTAS SECCIÓN 6
 1. Lea atentamente y comente la nota que dice "Important" en la sección 6.1. Una 
    vez instalado, verifique el estado del servicio httpd. 
 2. Ubique y revise brevemente el script que utiliza el cluster para administrar el 
@@ -115,9 +115,15 @@ Preguntas sección 6
    el recurso web y dónde se encuentra el recurso IP. ¿Por qué sucede esto?
 5. ¿Qué sucedió con los recursos al establecer la restricción en la sección 6.5? 
    ¿En qué otra situación los recursos se han migrado durante el transcurso de la guía?
-10) Entre la sección 6.5 y 6.8 se establecen restricciones entre los recursos para lograr 
-   ciertos efectos. Una vez alcanzada la sección 6.8 revise nuevamente los efectos de cada uno de los pasos realizados a partir de 6.5 
-11) Una vez completada la sección 6.8: realice un failover ida y vuelta, observando el tiempo de downtime del servicio http. 
+6. Entre la sección 6.5 y 6.8 se establecen restricciones entre los recursos para lograr 
+   ciertos efectos. Una vez alcanzada la sección 6.8 revise nuevamente los efectos de 
+   cada uno de los pasos realizados a partir de 6.5 
+7. Guarde y evalúe la salida de los comandos: "pcs constraint" y "crm_simulate -sL" 
+8. Observe la salida de crm_simulate luego de el failover manualde 6.8. Adicionalmente
+   restaure la restricción de ubicación de tal modo que el recurso apache prefiera en 
+   50 al nodo1. 
+8. Una vez completada la sección 6.8: realice un failover ida y vuelta, observando 
+   el tiempo de downtime del servicio http. 
 
 Preguntas sección 7 
 34) Observando restricción de orden: Reiniciar el recurso IP y observar el efecto sobre WebSite. 
