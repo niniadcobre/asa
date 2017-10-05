@@ -42,11 +42,13 @@ AGOSTO
 1  Semana 8/8	
 	Inicio de clases / Almacenamiento
 2  Semana 15/8
-        Almacenamiento  
+        Almacenamiento - md 
 3  Semana 22/8
-	Almacenamiento  
+        22/8 Asueto por Alerta Meteorológica
+	Almacenamiento  - LVM 
 4  Semana 29/8
-	Almacenamiento  
+	29/8 Almacenamiento LVM - Cuestionario 
+        31/8 Asueto Jornadas de Investigación y Extensión en la FAI  
 
 SEPTIEMBRE
 5  Semana 5/9
@@ -63,12 +65,14 @@ SEPTIEMBRE
 OCTUBRE
 9  Semana 3/10
 	Alta disponibilidad 
+        Jueves 5/5 Asueto por Alerta Meteorológica
 10 Semana 10/10
-	Alta disponibilidad / Recuperatorio 
+	Martes Alta disponibilidad  
+        Recuperatorio 12/10
 11 Semana 17/10
 	Alta disponibilidad 
 12 Semana 24/10
-	Virtualización
+	Alta disponibilidad 
 13 Semana 31/10
         Virtualización
 
