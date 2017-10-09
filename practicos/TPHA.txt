@@ -23,23 +23,28 @@ PASOS PRELIMINARES:
 7. ¿Cuál es el objetivo final del laboratorio? 
 
 PREGUNTAS HASTA 2.4.2
-1. ¿Comparable a qué software en Debian es yum?¿Comparable a qué software en Debian es rpm?
+1. ¿Comparable a qué software en Debian es yum?¿Comparable a qué software en 
+   Debian es rpm?
 2. ¿Qué repositorios están configurados en cada nodo?
 2. Chrony: ¿Qué comandos utiliza para iniciar y habilitar el servicio de NTP?
-3. Chrony: ¿Cómo verifica que los nodos están efectivamente sincronizando con NTP? 
+3. Chrony: ¿Cómo verifica que los nodos están efectivamente sincronizando con 
+   NTP? 
 5. ¿Cómo verifica que determinado paquete ya se encuentra instalado?
-6. ¿Cuál es la diferencia entre el método utilizado en 2.4.2 y el uso de ssh-key-gen y ssh-copy-id?
-7. ¿Para qué sirven los comandos screen y nohup?¿Por qué podrían serle de utilidad?
+6. ¿Cuál es la diferencia entre el método utilizado en 2.4.2 y el uso de 
+   ssh-key-gen y ssh-copy-id?
+7. ¿Para qué sirven los comandos screen y nohup?¿Por qué podrían serle de 
+   utilidad?
 8. Guarde el listado total de servicios corriendo hasta el momento. 
 
 
 PREGUNTAS DESDE 2.5 HASTA 2.6.3
 0. Guarde toda la salida de la instalación de paquetes propuesta en 2.5
-1. Indique brevemente para qué sirve cada uno de los paquetes instalados en 2.5. 
+1. Indique brevemente para qué sirve cada uno de los paquetes instalados en 2.5 
    Obtenga la información usando comandos del sistema. 
 2. Liste y OBSERVE el contenido de los paquetes instalados en la sección 2.5
 3. ¿Existen nuevos servicios relacionados al software instalado en 2.5?
-4. Una vez instalado el software de cluster ¿cómo puede verificar los nuevos servicios del sistema?
+4. Una vez instalado el software de cluster ¿cómo puede verificar los nuevos 
+   servicios del sistema?
 5. ¿Cuál es el objetivo del enlace simbólico creado en la sección 2.6.2?
 6. En la sección 2.6 indica hacer cambios en el firewall. ¿Por qué 
    cree que es necesario?¿Cómo puede darse cuenta qué firewall se 
@@ -50,17 +55,19 @@ PREGUNTAS DESDE 2.5 HASTA 2.6.3
    ¿Hay otros usuarios con ese shell definido?
 8. En la sección 2.6.3 los comandos se ejecutan en un sólo nodo. 
    ¿Por qué? ¿Cuál es la función del comando pcs?
-9. Guarde la salida del comando pcs cluster setup. Observe la salida del comando "pcs status". 
-   ¿Se encuentra el software de cluster ejecutándose en esta instancia? ¿Qué tarea realizó?
+9. Guarde la salida del comando pcs cluster setup. Observe la salida del 
+   comando "pcs status". 
+   ¿Se encuentra el software de cluster ejecutándose en esta instancia? 
+   ¿Qué tarea realizó?
 8. Observe el archivo de configuración creado por pcs para Corosync. 
    ¿En qué momento se instaló Corosync?¿Cuál es su función?
 
-PREGUNTAS A PARTIR DE SECCIÓN 3 Y HASTA 5.1 (NO PROCEDER CON 5.2)
-0. ¿Es pcs parte del "stack" de cluster (observe los gráficos de la presentación). 
-   ¿Cuál es su función?¿Podemos prescindir de este software?¿Existe algún servicio 
-   o demonio relacionado a pcs?
-1. ¿Qué elementos del cluster permite administrar pcs? Indique brevemente qué es cada 
-   uno de ellos.
+PREGUNTAS A PARTIR DE SECCIÓN 3 Y HASTA 5.1 
+0. ¿Es pcs parte del "stack" de cluster (observe los gráficos de la 
+   presentación). ¿Cuál es su función?¿Podemos prescindir de este software?
+   ¿Existe algún servicio o demonio relacionado a pcs?
+1. ¿Qué elementos del cluster permite administrar pcs? Indique brevemente qué 
+   es cada uno de ellos.
 2. Una vez iniciado los servicios de cluster con pcs, verifique el 
    estado de los mismos con systemctl. Guarde las salidas: observe errores 
    e información provista por los servicios. ¿Sobre qué aspectos del cluster 
@@ -68,20 +75,20 @@ PREGUNTAS A PARTIR DE SECCIÓN 3 Y HASTA 5.1 (NO PROCEDER CON 5.2)
 3. ¿El inicio de los servicios a través de pcs, habilita (enable) los servicios
    de modo que estos se inicien automáticamente luego de un reinicio de sistema?
 4. Reinicie los nodos y verifique que los servicios no se encuentran 
-   en ejecución. Reinicie los servicios esta vez utilizando systemctl, verificando
-   el estado de los servicios luego de CADA comando. ¿Por qué es necesario 
-   iniciar primero corosync y luego pacemaker?
-5. Ejecute las verificaciones en las secciones 4.2 y 4.3 en ambos nodos, observe 
-   diferencias. Verifique a qué paquete de software pertenece cada uno de los 
-   comandos de verificación. 
-6. En la sección 4.3 identifique cada uno de los procesos hijos de 
-   pacemakerd. Investigue su funcionalidad brevemente para entender 
-   qué parte del cluster implementan. 
-7. ¿A qué paquete pertenece el comando journalctl? ¿Los errores 
-   pertenecen todos a STONITH?
+   en ejecución. Reinicie los servicios esta vez utilizando systemctl, 
+   verificando el estado de los servicios luego de CADA comando. ¿Por qué es 
+   necesario iniciar primero corosync y luego pacemaker?
+5. Ejecute las verificaciones en las secciones 4.2 y 4.3 en ambos nodos, 
+   observe diferencias. Verifique a qué paquete de software pertenece cada uno 
+   de los comandos de verificación. 
+6. En la sección 4.3 identifique cada uno de los procesos hijos de pacemakerd. 
+   Investigue su funcionalidad brevemente para entender qué parte del cluster 
+   implementan. 
+7. ¿A qué paquete pertenece el comando journalctl? ¿Los errores pertenecen todos
+   a STONITH?
 8. Observe el log de Corosync
-9. Observe la salida de "pcs status --full" ¿Existen _recursos_ configurados hasta
- el momento?
+9. Observe la salida de "pcs status --full" ¿Existen _recursos_ configurados  
+   hasta el momento?
 
 PREGUNTAS A PARTIR DE 5.2 hasta 5.4 (INCLUSIVE)
 1. Los recursos del cluster son la razón de ser del cluster. 
@@ -92,38 +99,57 @@ PREGUNTAS A PARTIR DE 5.2 hasta 5.4 (INCLUSIVE)
 
 2. Ubique dentro de /usr/lib/ocf/resource.d/ el script 
    correspondiente a la IP configurada en 5.2. Observe brevemente su contenido,
-   en particular las líneas finales que procesan la acción a realizar con el servicio. 
+   en particular las líneas finales que procesan la acción a realizar con el 
+   servicio. 
 
 3. Lea brevemente man ocf_heartbeat_IPaddr2. ¿Sobre qué provee información?
-4. ¿Cómo puede obtener el listado de agentes disponibles para systemd en lugar de OCF?
+4. ¿Cómo puede obtener el listado de agentes disponibles para systemd en lugar 
+   de OCF?
 
-5. Una vez configurado el recurso IP, observe el estado del cluster y la nueva IP configurada 
-   en la interfaz de red (comando ip). ¿En qué nodo se inició el recurso? 
-6. PREVIO a realizar el failover pedido en la sección 5.3, observe el estado del recurso 
-   creado, y mantenga un ping desde un lugar remoto para observar lo que sucede con 
-   el recurso. ¿Cuán apreciable resultó el tiempo de downtime del recurso? 
-7. PREVIO a modificar la propiedad resource-stickiness en 5.4, observe la salida del comando "pcs resource defaults". 
-8. ¿A qué recursos afecta el resource-stickiness configurado en 5.4? ¿Para qué sirve?
+5. Una vez configurado el recurso IP, observe el estado del cluster y la nueva 
+   IP configurada en la interfaz de red (comando ip). ¿En qué nodo se inició el 
+   recurso? 
+
+6. PREVIO a realizar el failover pedido en la sección 5.3, observe el estado de
+   recurso creado, y mantenga un ping desde un lugar remoto para observar lo 
+   que sucede con el recurso. ¿Cuán apreciable resultó el tiempo de downtime de
+   recurso? 
+
+7. PREVIO a modificar la propiedad resource-stickiness en 5.4, observe la salid
+   del comando "pcs resource defaults". 
+
+8. ¿A qué recursos afecta el resource-stickiness configurado en 5.4? ¿Para qué 
+   sirve?
 
 PREGUNTAS SECCIÓN 6
-1. Lea atentamente y comente la nota que dice "Important" en la sección 6.1. Una 
-   vez instalado, verifique el estado del servicio httpd. 
-2. Ubique y revise brevemente el script que utiliza el cluster para administrar el 
-   recurso apache en la sección 6.4. 
-3. Lea brevemente la página man correspondiente al recurso. 
+1. Lea atentamente y comente la nota que dice "Important" en la sección 6.1. 
+   Una vez instalado, verifique el estado del servicio httpd. 
+
+2. Ubique y revise brevemente el script que utiliza el cluster para administrar 
+   el recurso apache en la sección 6.4.
+ 
+3. Lea brevemente la página man correspondiente al recurso.
+ 
 4. Una vez creado el recurso http (sección 6.4), OBSERVE en qué nodo se inició 
    el recurso web y dónde se encuentra el recurso IP. ¿Por qué sucede esto?
-5. ¿Qué sucedió con los recursos al establecer la restricción en la sección 6.5? 
-   ¿En qué otra situación los recursos se han migrado durante el transcurso de la guía?
-6. Entre la sección 6.5 y 6.8 se establecen restricciones entre los recursos para lograr 
-   ciertos efectos. Una vez alcanzada la sección 6.8 revise nuevamente los efectos de 
-   cada uno de los pasos realizados a partir de 6.5 
-7. Guarde y evalúe la salida de los comandos: "pcs constraint" y "crm_simulate -sL" 
-8. Observe la salida de crm_simulate luego de el failover manualde 6.8. Adicionalmente
-   restaure la restricción de ubicación de tal modo que el recurso apache prefiera en 
-   50 al nodo1. 
-8. Una vez completada la sección 6.8: realice un failover ida y vuelta, observando 
-   el tiempo de downtime del servicio http. 
+
+5. ¿Qué sucedió con los recursos al establecer la restricción en la sección 6.5?
+   ¿En qué otra situación los recursos se han migrado durante el transcurso de 
+   la guía?
+
+6. Entre la sección 6.5 y 6.8 se establecen restricciones entre los recursos 
+   para lograr ciertos efectos. Una vez alcanzada la sección 6.8 revise 
+   nuevamente los efectos de cada uno de los pasos realizados a partir de 6.5 
+
+7. Guarde y evalúe la salida de los comandos: "pcs constraint" y 
+   "crm_simulate -sL" 
+
+8. Observe la salida de crm_simulate luego de el failover manualde 6.8. 
+   Adicionalmente restaure la restricción de ubicación de tal modo que el 
+   recurso apache prefiera en 50 al nodo1. 
+
+8. Una vez completada la sección 6.8: realice un failover ida y vuelta, 
+   observando el tiempo de downtime del servicio http. 
 
 Preguntas sección 7 
 34) Observando restricción de orden: Reiniciar el recurso IP y observar el efecto sobre WebSite. 
