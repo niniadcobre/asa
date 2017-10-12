@@ -151,8 +151,15 @@ PREGUNTAS SECCIÓN 6
 9. Una vez completada la sección 6.8: realice un failover ida y vuelta, 
    observando el tiempo de downtime del servicio http. 
 
-Preguntas sección 7 
-0. Lea la sección sobre DRBD del apunte de cátedra. 
+PREGUNTAS SECCIÓN 7 
+------------------------------------------------------------------------------
+NOTA: En la página 42 de la guía se indica en una nota IMPORTANT, descargar 
+      el script OCF, para controlar el recurso drbd, desde la página del 
+      desarrollador. Dicho link esta DESACTUALIZADO, en su lugar utilice: 
+   https://raw.githubusercontent.com/LINBIT/drbd-utils/master/scripts/drbd.ocf
+------------------------------------------------------------------------------
+
+0. LEA LA SECCIÓN SOBRE DRBD DEL APUNTE DE CÁTEDRA. 
 1. Observando restricción de orden: Reiniciar el recurso IP y observar el 
    efecto sobre WebSite. 
 2. Observar restricción de ubicación: Mover el recurso IP y observar el efecto
@@ -196,6 +203,7 @@ Preguntas sección 7
 
 12. Una vez configurado drbd, y PREVIO a la sección 7.6, detener el cluster 
     (ambos nodos) y migrar el dispositivo drbd manualmente (ida y vuelta). 
+   = Observe todo el proceso realizando watch cat /proc/drbd en ambos nodos= 
     Probar montaje manual y escritura, en ambos nodos. DESMONTAR antes de 
     iniciar el cluster nuevamente. Observe que en esta instancia aún no hay 
     relación entre el software drbd y Pacemaker; este último no tiene 
@@ -204,12 +212,11 @@ Preguntas sección 7
 13. Observar la creación de los recursos en 7.6.¿Por qué cree necesario este 
     tipo de recurso master/slave?¿Qué diferencia hay con cluster IP y Apache?
 
-14. En la sección 7.7 se define el recurso que controla el sistema de archivos.     ¿Quién controla el montaje del mismo? ¿Se montará el sistema de archivos 
+14. En la sección 7.7 se define el recurso que controla el sistema de archivos.
+    ¿Quién controla el montaje del mismo? ¿Se montará el sistema de archivos 
     durante el inicio del sistema? Compruebe deteniendo el cluster y reinicie 
-    las vms. 
+    los nodos. 
 
-15. Revise el documento: Pacemaker 1.1 Configuration Explained. ¿Qué informació
-    provee? 
 
 
 
