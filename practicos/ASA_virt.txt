@@ -40,6 +40,7 @@ Caso de estudio: Docker
 7) Cree tres containers a partir de dicha imagen. 
    docker run -dit -p 8080:80 -v "$PWD":/usr/local/apache2/htdocs/ httpd
    docker run -dit -P -v "$PWD":/usr/local/apache2/htdocs/ httpd
+   docker run -dit -P httpd
 
 8) Observe el listado de containers actuales: 
    docker container ls -a 
@@ -49,5 +50,30 @@ Caso de estudio: Docker
 
 9) Obtenga el mapa de puertos entre el anfitrión y los huéspedes: 
    docker port 
-   
+
+10) Investigue el container: 
+	docker exec <nombre container> ls -l
+	docker exec <nombre container> ps -ef 
+	docker exec <nombre container> ip add  
+	docker exec <nombre container> df 
+	etc...	
+
+10) Copie tres páginas web distintas dentro de cada uno de los containers. 
+    Verifique el acceso y correcto funcionamiento de cada una. 
+
+11) Cree una nueva imagen a partir de su página web modificada (commit de 
+    cambios).
+ docker commit -m "What did you do to the image" -a "Author Name" container-id repository/new_image_name
+
+12) Destruya todos los containers en ejecución y vuelva a crear nuevas 
+    instancias a partir de las imágenes creadas en el paso anterior. Verifique}     el funcionamiento de los nuevos containers. Cree más de un container a
+    partir de la misma imagen. 
+
+13) repita los pasos buscando imágen oficial de una distribución a elección
+    distinta de la del anfitrión que ejecuta el motor docker.    
+
+ 
+Tome el tiempo que tarda la descarga y ejecución (deploy) de un container. 
+Compare a una vm tradicional. 
+
 3) ¿Qué tipo de virtualización implementa docker?  
