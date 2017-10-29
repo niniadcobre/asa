@@ -1,0 +1,53 @@
+Caso de estudio: Docker 
+
+0) Instale Docker (guarde las salidas):
+   a)	# yum check-update
+   b) 	# curl -fsSL https://get.docker.com/ | sh 
+   c)	# systemctl start docker
+   d)   # systemctl status docker 
+   e)	# systemctl enable docker 
+
+  Explique qué sucede en b)
+
+1) ¿Existe algún paquete docker en su instalación? En ese caso 
+   observe el contenido del paquete. 
+
+2) ¿Existe algún servicio en ejecución relativo a docker? ¿Cuál 
+   es el estado del servicio en ese caso?
+
+3) Observe el comando docker y sus subcomandos. 
+
+4) ¿Qué provee el sitio hub.docker? ¿Cómo se relaciona 
+   con el comando "docker search"?
+
+5) Observe el listado de imagenes coincidentes con la palabra httpd y apache. 
+   Obtenga la imagen httpd oficial.
+   # docker search httpd
+   # docker search apache 
+   # docker pull httpd 
+
+6) Observe el tamaño de la imágen descargada: 
+   docker image ls
+   docker images
+   ¿Hace cuánto tiempo fue creada la imágen?
+
+   Observe la información en: 
+   https://hub.docker.com/_/httpd/
+
+7) Observe el ciclo de vida de un container según los slides de clase. ¿Ah 
+   creado algún container en hasta este punto?
+
+7) Cree tres containers a partir de dicha imagen. 
+   docker run -dit -p 8080:80 -v "$PWD":/usr/local/apache2/htdocs/ httpd
+   docker run -dit -P -v "$PWD":/usr/local/apache2/htdocs/ httpd
+
+8) Observe el listado de containers actuales: 
+   docker container ls -a 
+   docker ps 
+
+   ¿Qué información obtiene acerca de los container? 
+
+9) Obtenga el mapa de puertos entre el anfitrión y los huéspedes: 
+   docker port 
+   
+3) ¿Qué tipo de virtualización implementa docker?  
