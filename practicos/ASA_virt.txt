@@ -1,4 +1,10 @@
+=========================================
+ADMINISTRACIÓN DE SISTEMAS AVANZADA - 2017
+TUASSL - UNCOMA
+=========================================
 Caso de estudio: Docker 
+=========================================
+
 
 0) Instale Docker (guarde las salidas):
    a)	# yum check-update
@@ -17,30 +23,46 @@ Caso de estudio: Docker
 
 3) Observe el comando docker y sus subcomandos. 
 
-4) ¿Qué provee el sitio hub.docker? ¿Cómo se relaciona 
+4) ¿Qué provee el sitio https://hub.docker.com/? ¿Cómo se relaciona 
    con el comando "docker search"?
 
-5) Observe el listado de imagenes coincidentes con la palabra httpd y apache. 
+5) Observe el listado de imágenes coincidentes con la palabra httpd y apache. 
    Obtenga la imagen httpd oficial.
    # docker search httpd
    # docker search apache 
    # docker pull httpd 
 
-6) Observe el tamaño de la imágen descargada: 
+6) Observe el tamaño de la imagen descargada: 
    docker image ls
    docker images
-   ¿Hace cuánto tiempo fue creada la imágen?
+   ¿Hace cuánto tiempo fue creada la imagen?
 
    Observe la información en: 
    https://hub.docker.com/_/httpd/
 
 7) Observe el ciclo de vida de un container según los slides de clase. ¿Ah 
-   creado algún container en hasta este punto?
+   creado algún container hasta este punto? 
+
+8) Partiendo del ciclo de vida de un container identifique los comandos
+   de docker que realizan la transición entre estados. 
 
 7) Cree tres containers a partir de dicha imagen. 
-   docker run -dit -p 8080:80 -v "$PWD":/usr/local/apache2/htdocs/ httpd
-   docker run -dit -P -v "$PWD":/usr/local/apache2/htdocs/ httpd
-   docker run -dit -P httpd
+   a) docker run -dit -P httpd
+      copie una página de prueba: 
+      docker cp index.html <nombre_container>:/usr/local/apache2/htdocs 
+
+   b) docker run -dit -p 8080:80 -v "$PWD":/usr/local/apache2/htdocs/ httpd
+      copie una página de prueba distinta a la anterior: 
+      docker cp index.html <nombre_container>:/usr/local/apache2/htdocs 
+
+   c) monte un sistema de archivos en /mnt y luego ejecute: 
+      docker run -dit -P -v /mnt:/usr/local/apache2/htdocs/ httpd
+      para este último caso escriba en el volumen, situado en el anfitrión, 
+      una página de prueba index.html y verifique el funcionamiento. 
+ 
+   Indique diferencias entre los comandos anteriores. Ayuda:
+   https://docs.docker.com/engine/reference/run/
+   
 
 8) Observe el listado de containers actuales: 
    docker container ls -a 
@@ -58,22 +80,41 @@ Caso de estudio: Docker
 	docker exec <nombre container> df 
 	etc...	
 
-10) Copie tres páginas web distintas dentro de cada uno de los containers. 
-    Verifique el acceso y correcto funcionamiento de cada una. 
+11) Introducción: A partir de que se ejecuta (run) un container a partir de una imagen,
+    es posible crear, modificar y borrar archivos dentro del mismo. Sin embargo los
+    cambios sólo se aplican a ése container. Es posible pararlo (stop) y volver 
+    a iniciarlo, pero una vez que se destruya (rm), los cambios se pierden. Para 
+    guardar los cambios necesitamos realizar un commit del container actual:
 
-11) Cree una nueva imagen a partir de su página web modificada (commit de 
-    cambios).
- docker commit -m "What did you do to the image" -a "Author Name" container-id repository/new_image_name
+    Cree una nueva imagen a partir de sus containers modificados (cometer los 
+    cambios):
 
-12) Destruya todos los containers en ejecución y vuelva a crear nuevas 
-    instancias a partir de las imágenes creadas en el paso anterior. Verifique}     el funcionamiento de los nuevos containers. Cree más de un container a
-    partir de la misma imagen. 
+    a) detener el container cuya imagen deseamos guardar: 
+       docker stop <nombre_container>
+    b) guardar los cambios a una nueva imagen: 
+       docker commit -m "mensaje indicando el cambio" -a "Nombre del autor" container-id repository/new_image_name
 
-13) repita los pasos buscando imágen oficial de una distribución a elección
-    distinta de la del anfitrión que ejecuta el motor docker.    
+    c) Observar el resultado: 
+    docker images
 
+    Una vez que realizamos el commit, la imagen se guarda localmente, en el anfitrión. 
+    Si eventualmente queremos que esté disponible en Docker Hub, deberemos crear una cuenta
+    y realizar el push de la misma. No realizaremos este paso dentro de los fines 
+    de esta práctica.  
  
-Tome el tiempo que tarda la descarga y ejecución (deploy) de un container. 
-Compare a una vm tradicional. 
+12) Destruya todos los containers creados hasta el momento y vuelva a crear nuevas 
+    (más de una) instancias a partir de la imagen creada en el paso anterior. 
+    Verifique el funcionamiento de los nuevos containers. 
+
+13) Repita los pasos buscando imagen oficial de una distribución a elección
+    distinta de la del anfitrión que ejecuta el motor docker.  
+    Tome el tiempo que tarda la descarga y ejecución (deploy) de un container. 
+    Compare a una vm tradicional. 
 
 3) ¿Qué tipo de virtualización implementa docker?  
+   ¿Que percepción tiene acerca de la aislamiento provista por la 
+   implementación de containers de docker?
+
+14) Elimine los containers y las imágenes:  
+    docker rm 
+    docker rmi 
