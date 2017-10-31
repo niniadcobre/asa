@@ -3,8 +3,13 @@ ADMINISTRACIÓN DE SISTEMAS AVANZADA - 2017
 TUASSL - UNCOMA
 =========================================
 Caso de estudio: Docker 
-=========================================
 
+NOTA: esta práctica esta diseñada para 
+ser ejecutada en sistema operativo 
+Centos 7. Si bien podría reproducirse 
+en otros sistemas operativos, no ha sido 
+verificado el correcto funcionamiento.
+=========================================
 
 0) Instale Docker (guarde las salidas):
    a)	# yum check-update
@@ -21,7 +26,8 @@ Caso de estudio: Docker
 2) ¿Existe algún servicio en ejecución relativo a docker? ¿Cuál 
    es el estado del servicio en ese caso?
 
-3) Observe el comando docker y sus subcomandos. 
+3) Observe el comando docker y sus subcomandos. Observe la 
+   información provista por "docker info" 
 
 4) ¿Qué provee el sitio https://hub.docker.com/? ¿Cómo se relaciona 
    con el comando "docker search"?
@@ -30,6 +36,7 @@ Caso de estudio: Docker
    Obtenga la imagen httpd oficial.
    # docker search httpd
    # docker search apache 
+
    # docker pull httpd 
 
 6) Observe el tamaño de la imagen descargada: 
@@ -46,8 +53,8 @@ Caso de estudio: Docker
 8) Partiendo del ciclo de vida de un container identifique los comandos
    de docker que realizan la transición entre estados. 
 
-7) Cree tres containers a partir de dicha imagen. 
-   a) docker run -dit -P httpd
+9) Cree tres containers a partir de dicha imagen. 
+   a) docker run -dit -P -h container01 httpd
       copie una página de prueba: 
       docker cp index.html <nombre_container>:/usr/local/apache2/htdocs 
 
@@ -64,27 +71,34 @@ Caso de estudio: Docker
    https://docs.docker.com/engine/reference/run/
    
 
-8) Observe el listado de containers actuales: 
-   docker container ls -a 
-   docker ps 
+10) Observe el listado de containers actuales: 
+    docker container ls -a 
+    docker container ls 
+    docker ps 
+    docker ps -a 
 
    ¿Qué información obtiene acerca de los container? 
 
-9) Obtenga el mapa de puertos entre el anfitrión y los huéspedes: 
+11) Obtenga el mapa de puertos entre el anfitrión y los huéspedes: 
    docker port 
 
-10) Investigue el container: 
+12) Investigue el container: 
 	docker exec <nombre container> ls -l
 	docker exec <nombre container> ps -ef 
 	docker exec <nombre container> ip add  
 	docker exec <nombre container> df 
+	docker exec <nombre container> cat /etc/passwd  
+	docker exec <nombre container> hostname 
 	etc...	
+        docker top <nombre container> 
+        docker stats <nombre container> 
 
-11) Introducción: A partir de que se ejecuta (run) un container a partir de una imagen,
-    es posible crear, modificar y borrar archivos dentro del mismo. Sin embargo los
-    cambios sólo se aplican a ése container. Es posible pararlo (stop) y volver 
-    a iniciarlo, pero una vez que se destruya (rm), los cambios se pierden. Para 
-    guardar los cambios necesitamos realizar un commit del container actual:
+13) Introducción: A partir de que se ejecuta (run) un container a partir de una
+    imagen, es posible crear, modificar y borrar archivos dentro del mismo. Sin
+    embargo los cambios sólo se aplican a ése container. Es posible pararlo 
+    (stop) y volver a iniciarlo (start), pero una vez que se destruya (rm), los 
+    cambios se pierden. Para guardar los cambios necesitamos realizar un commit 
+    del container actual:
 
     Cree una nueva imagen a partir de sus containers modificados (cometer los 
     cambios):
@@ -97,24 +111,37 @@ Caso de estudio: Docker
     c) Observar el resultado: 
     docker images
 
-    Una vez que realizamos el commit, la imagen se guarda localmente, en el anfitrión. 
-    Si eventualmente queremos que esté disponible en Docker Hub, deberemos crear una cuenta
-    y realizar el push de la misma. No realizaremos este paso dentro de los fines 
-    de esta práctica.  
+    Una vez que se procede a cometer los cambios (commit), la imagen se guarda 
+    localmente, en el anfitrión. Si eventualmente queremos que esté disponible 
+    en Docker Hub, deberemos crear una cuenta en el sitio y realizar el push de 
+    la misma. No realizaremos este paso dentro de los fines de esta práctica.  
  
-12) Destruya todos los containers creados hasta el momento y vuelva a crear nuevas 
-    (más de una) instancias a partir de la imagen creada en el paso anterior. 
-    Verifique el funcionamiento de los nuevos containers. 
+14) Destruya todos los containers creados hasta el momento y vuelva a crear 
+    nuevas (más de una) instancias a partir de la imagen creada en el paso 
+    anterior.  Verifique el funcionamiento de los nuevos containers. 
 
-13) Repita los pasos buscando imagen oficial de una distribución a elección
-    distinta de la del anfitrión que ejecuta el motor docker.  
+15) Repita los pasos 5,6,9,10,11,12 buscando imagen oficial de una distribución 
+    a elección distinta de la del anfitrión que ejecuta el motor docker.  
     Tome el tiempo que tarda la descarga y ejecución (deploy) de un container. 
-    Compare a una vm tradicional. 
+    Compare a una vm tradicional.
 
-3) ¿Qué tipo de virtualización implementa docker?  
-   ¿Que percepción tiene acerca de la aislamiento provista por la 
-   implementación de containers de docker?
+16) Inicie una sesión dentro del container creado en el punto anterior (docker 
+    attach) Instale un paquete a su elección dentro del container. Si crea un 
+    nuevo container a partir de la misma imágen, ¿estrá pre-instalado el paquete    que acaba de instalar?
 
-14) Elimine los containers y las imágenes:  
+17) Guarde (save) alguna imágen creada por usted, y transfiera la misma a otro 
+    equipo con instalación de docker. A continuación importe (load) la imagen 
+    en el nodo destino y cree un container a partir de dicha imagen. 
+
+18) Repita el ejercicio anterior pero utilizando netcat (nc) y sin archivo 
+    intermedio. NOTA: deshabilite el servicio firewalld en el destino o 
+    agregue la regla correspondiente al puerto de elección. 
+
+19) ¿Qué tipo de virtualización implementa docker?  
+    ¿Que percepción tiene acerca del aislamiento provistp por la 
+    implementación de containers de docker?
+
+20) Detenga y elimine los containers y las imágenes:  
+    docker stop 
     docker rm 
     docker rmi 
