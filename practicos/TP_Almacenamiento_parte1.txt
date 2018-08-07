@@ -1,0 +1,93 @@
+######################################
+# ASA - 2018 - Almacenamiento - PARTE1
+######################################
+
+Dispositivos loop (bucle)
+-------------------------
+1) Crear un script que genere n archivos de un tamaño fijo, y los asocie a 
+loop devices. El número de archivos y su tamaño deben recibirse como argumento
+de entrada.  
+
+2) Utilice un loopdevice para visualizar el contenido de usa ISO. ¿Cómo 
+modificaría el fstab para lograr que esta ISO se monte automáticamente en 
+cada booteo?
+
+Tabla de particiones
+--------------------
+3) Crear y destruir particiones con fdisk, parted, gparted (utilice los 
+dispositivos loop creados anteriormente). ¿Para qué tipo de tabla de 
+particiones provee soporte cada uno de estas herramientas?
+
+4) Reconocer tipos de particiones. Comprender la estructura de la tabla de 
+   particiones. MBR/BIOS particiones primarias, extendidas y lógicas. UEFI/GPT.
+
+   a) Crear en una tabla de particiones tipo msdos (IBM PC) sobre un dispositivo 
+   loop. Copiar la tabla de particiones a un archivo, destruir la tabla anterior
+   y restaurarla. Escriba el procedimiento paso a paso. Observe el cambio del 
+   contenido del dispositivo antes y después (hexdump) 
+
+   b) Crear una tabla de particiones tipo GPT. Destruir la tabla principal y 
+   restaurarla del backup que la misma establece.  
+
+5) Discuta ¿Qué relación existe entre GPT/UEFI - MBR/BIOS? ¿Diferencias?
+
+
+Archivos prealojados/dispersos
+------------------------------
+Archivo prealojado: una aplicación necesita reservar espacio antes de usarlo
+efectivamente (antes de tener los datos a escribir). Esto es crear las estructuras
+internas que representan al archivo dentro del sistema de archivos y, reservar 
+los bloques.  Las opciones son escribir ceros o utilizar 
+archivos dispersos provistos por el sistema de archivos. 
+
+6) ¿Todos los sistemas de archivos implementan archivos dispersos?
+
+7) ¿Cómo reconocer un archivo disperso? Observar los comandos du y ls y find. 
+
+8) Crear un archivo de 100Mb utilizando fallocate, dd y truncate. Tomar 
+los tiempos en cada caso (comando time) ¿Son archivos dispersos? 
+
+9) ¿Qué sucede al realizar una copia de un archivo disperso?¿Qué sucede si 
+hacemos la copia en un sistema de archivos que no implementa este tipo de
+archivos?
+
+10) ¿Es posible crear un archivo disperso mayor al espacio libre en el sistema
+de archivos? Realice el intento. 
+
+11) ¿Es posible crear un archivo disperso mayor al tamaño total del sistema de 
+archivos? Realice el intento. 
+
+Dispositivos especiales
+-----------------------
+12) Investigue el funcionamiento del comando dd: 
+   
+  8.1) dd of=archivo if=/dev/zero bs=1k count=5120
+  8.2) dd of=archivo if=/dev/urandom bs=1k count=5120
+  8.3) top | dd of=archivo bs=1k count=5120
+  8.4) dd of=archivo bs=1k seek=5120 count=0
+   a) observe el contenido de cada archivo con od -c. ¿De dónde 
+      proviene el contenido en cada caso? 
+   b) ¿Son archivos dispersos?
+   c) ¿Qué función cumple los modificadores bs seek y count?
+
+13) Explique el efecto de de la opción oflag=append y conv=notrunc de 
+dd en la siguiente secuencia.
+$ dd if=/dev/urandom of=archivo1 bs=1024k count=5 
+$ dd if=/dev/urandom of=archivo1 bs=512 count=1 oflag=append conv=notrunc 
+
+   a) ¿Qué tipo de archivo es archivo1? ¿Cuál es su contenido?
+   b) ¿Qué tipo de archivo es /dev/urandom? ¿Para qué sirve? Compare con 
+      /dev/zero. 
+   c) ¿Qué sucede si repetimos n veces el segundo comando? 
+
+Sistema de archivos
+-------------------
+14) ¿Qué sistemas de archivos están soportados en su computadora? (man filesystems)
+
+15) ¿Qué tipos de re-dimensión de archivos podemos hacer? ¿Qué significa hacer 
+re-dimensión en caliente?¿Todos los sistemas de archivos soportan estas 
+características? Ejemplifique. 
+
+16) Reproducir en una terminal paso a paso la secuencia de comandos presentada
+en el apunte de cátedra para "Loop devices" (Configuraciones de almacenamiento)
+Explique que sucede en cada comando.  
