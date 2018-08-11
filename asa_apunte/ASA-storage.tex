@@ -16,16 +16,16 @@ Los dispositivos lógicos de bloques están asociados a algún medio de almacena
 
 \nonota{Presentan una interfaz que provee direccionamiento random o directo, es decir, sus bloques están numerados y se puede acceder a cualquier bloque con independencia de cuál haya sido accedido anteriormente (operación de \emph{seek}). Pueden directamente contener un filesystem u ofrecer soporte a otros dispositivos virtuales, que los agrupan (como los dispositivos RAID) o en general los utilizan (como los dispositivos snapshot de LVM). Los típicos dispositivos de bloques con los que nos encontramos son los discos y las particiones, pero es interesante conocer otros dispositivos que están soportados por volúmenes lógicos, archivos, u otros, remotos, que se acceden por medio de la red.}
 
-\subsection{Temas de práctica}
-\begin{enumerate}
-	\item Crear y destruir particiones con fdisk, parted, gparted. 
-	\item Reconocer tipos de particiones. Comprender la estructura de la tabla de particiones. MBR/BIOS particiones primarias, extendidas y lógicas. UEFI/GPT. 
-	\item Comando dd, modificadores bs y count. Copia de dispositivos y archivos.
-	\item Dispositivos /dev/null y /dev/zero. Creación de archivos prealojados. Modificador seek. fallocate. 
-	\item Comando mkfs. Tipo de filesystem. Filesystems sobre una partición, sobre un archivo.
-	\item Loop devices. Comando losetup. Comando mount. Opciones ro, loop, offset. Montado de filesystems sobre una partición física, sobre un archivo, sobre una partición en una imagen de disco.
-	\item Redimensionamiento de filesystems. Comando dd y modificador conv=notrunc. Comando resize2fs. Opciones relacionadas con filesystems en parted.
-\end{enumerate}
+%\subsection{Temas de práctica}
+%\begin{enumerate}
+%	\item Crear y destruir particiones con fdisk, parted, gparted. 
+%	\item Reconocer tipos de particiones. Comprender la estructura de la tabla de particiones. MBR/BIOS particiones primarias, extendidas y lógicas. UEFI/GPT. 
+%	\item Comando dd, modificadores bs y count. Copia de dispositivos y archivos.
+%	\item Dispositivos /dev/null y /dev/zero. Creación de archivos prealojados. Modificador seek. fallocate. 
+%	\item Comando mkfs. Tipo de filesystem. Filesystems sobre una partición, sobre un archivo.
+%	\item Loop devices. Comando losetup. Comando mount. Opciones ro, loop, offset. Montado de filesystems sobre una partición física, sobre un archivo, sobre una partición en una imagen de disco.
+%	\item Redimensionamiento de filesystems. Comando dd y modificador conv=notrunc. Comando resize2fs. Opciones relacionadas con filesystems en parted.
+%\end{enumerate}
 
 \subsection{Loop devices}
 \begin{lstlisting}

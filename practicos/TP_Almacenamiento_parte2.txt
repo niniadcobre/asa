@@ -1,31 +1,78 @@
 #############################
-# ASA - 2016 - Almacenamiento
+# ASA - 2018 - Almacenamiento
 #############################
 
-NOTA: estos prácticos son COMPLEMENTARIOS a la ejercitación propuesta en el 
-apunte de cátedra. 
+NOTA: utilice loop devices para hacer pruebas.
 
-NOTA: utilice loop devices para probar en el laboratorio.  
+1) ¿Qué marcas, modelos y precios de tarjetas controladoras RAID puede 
+   encontrar? ¿Con qué capacidades?
 
-1) Crear un dispositivo md LINEAR, RAID 0, RAID 1, RAID5 y RAID10
+2) ¿Qué diferencias hay entre Software RAID, Hardware RAID y Fake RAID?
+    
+3) ¿Qué niveles RAID ofrecen redundancia? ¿Contra qué eventos protege esta 
+  redundancia? ¿Contra qué eventos no protege esta redundancia?
 
-2) Armar una tabla comparativa de LINEAR, RAID 0, RAID 1, RAID 5 y RAID10
-con al menos: 
+4) El uso de un dispositivo RAID, ¿es un reemplazo efectivo para las políticas 
+   y actividades de backup?
+
+5) Armar una tabla comparativa de LINEAR, RAID 0, RAID 1, RAID 5 y RAID10
+   con al menos: 
 	Tolerancia a fallos 
 	Performance de lectura 
 	Performance de escritura 
 	Mínima cantidad de discos necesarios.
 	Porcentaje de espacio utilizable para datos 
 
-3) ¿Dónde se almacena la información acerca del array? 
-
-4) ¿Es posible trasladar un array entre dos máquinas? ¿Qué se necesita? Escriba
-un procedimiento y realice la prueba. 
-
-5) ¿Dónde se almacena la información (metadatos) que md crea sobre 
-los arrays?
-
 6) ¿Cuáles son las piezas de software involucradas en la administración de
-arrays creados con Linux md? ¿Alcanza con el driver del kernel? ¿Existen 
-archivos de configuración?¿Hay servicios relacionados?¿Qué sucede con los
-dispositivos array al iniciar el sistema?
+   arrays creados con Linux md? ¿Alcanza con el driver del kernel? ¿Existen 
+   archivos de configuración?¿Hay servicios relacionados?
+
+7) ¿Es posible trasladar un array entre dos máquinas? ¿Qué se necesita?
+   Indique todo el software necesario para implementar Linux Raid md. 
+   Escriba un procedimiento y realice la prueba. 
+
+8) La información que representa la estructura de cada dispositivo Linux md 
+   se denomina metadato 
+     a) ¿Dónde se almacena? 
+     b) ¿Qué es el superbloque?¿Para qué sirve esta información?¿Qué sucede 
+        al iniciar el sistema con estos dispositivos?
+     c) ¿Qué sucede si el dispositivo a utilizar en un array contiene un 
+        sistema de archivos?¿Qué sucederá con los datos al crear el array?
+
+9) ¿Cuál es la diferencia entre los niveles Linear RAID y RAID 0? ¿Qué clase de 
+   redundancia ofrece cada uno? ¿Contra qué eventos protege?
+
+10) Crear un dispositivo md LINEAR, RAID 0, RAID 1, RAID5, RAID10 y RAID1+0 
+   anidado. Observe en cada caso la relación del espacio utilizable y el 
+   espacio total necesario para armar cada configuración. 
+
+11) Preparar un RAID nivel 1 sobre dos dispositivos loop. Particionar, crear 
+    un sistema de archivos en él y montarlo. 
+      a. Inyectar un fallo en uno de los discos. 
+      b. Agregar un nuevo disco e incorporarlo al RAID. 
+      c. Observar la sincronización del dispositivo. ¿Se ve afectado el uso del
+    sistema de archivos? 
+
+12) Como antes, preparar un RAID nivel 1, particionada y con sistema de 
+    archivos, pero con una unidad spare. 
+      a. Inyectar un fallo en uno de los discos y observar el comportamiento 
+      del dispositivo. 
+      b. Retire el disco fallado y compruebe en qué estado queda el dispositivo.      ¿Se ve afectado el uso del sistema de archivos? 
+      c. Vuelva a agregar el disco y compruebe en qué estado queda el 
+      dispositivo.
+
+13) Si dispone de dos discos reales (pueden ser particiones de dos pendrive): 
+  a. Preparar un arreglo linear RAID sobre dos discos extra agregados al equipo.
+  b. Preparar un arreglo RAID nivel 0 sobre dos discos extra agregados al 
+     equipo.
+  c. ¿Puede medir la diferencia en performance entre los dispositivos de los 
+     ejercicios anteriores, de linear RAID y de nivel 0? ¿Tiene sentido esta 
+     medición cuando el equipo es una máquina virtual?
+
+14) ¿Con qué comandos se investiga el estado de un dispositivo RAID? ¿Cómo se 
+    sabe cuándo un dispositivo RAID está activo o en modo degradado? ¿Cómo se 
+    sabe cuándo un dispositivo está fallado, activo, sincronizando?
+
+15) ¿Cuál es la forma de convertir en dispositivo RAID 1 un sistema de archivos
+     ya existente? (opción --build). 
+	

@@ -166,24 +166,24 @@ mdadm --stop /dev/md0
 En este último paso se detiene el array, sin embargo la información aún persiste en los dispositivos lo que posibilita la re-construcción del mismo en caso de ser necesario (modo assemble). Para eliminar la información 
 referente al array, almacenada en cada componente del mismo, se proveen herramientas específicas: ver zero-superblock en el manual en línea. 
 
-\subsection {Temas de práctica}
-\begin{enumerate}
-	\item ¿Qué marcas, modelos y precios de tarjetas controladoras RAID puede encontrar? ¿Con qué capacidades?
-	\item ¿Qué diferencias hay entre Software RAID y Hardware RAID?
-	\item ¿Qué niveles RAID ofrecen redundancia? ¿Contra qué eventos protege esta redundancia? ¿Contra qué eventos \emph{no} protege esta redundancia? 
-	\item El uso de un dispositivo RAID, ¿es un reemplazo efectivo para las políticas y actividades de backup?
-	\item ¿Cuáles niveles RAID ofrecen mejor velocidad de trabajo? ¿De qué factores depende la ventaja en performance de los diferentes niveles RAID entre sí y con respecto al uso de una única unidad de disco?
-	\item ¿Cuál es la diferencia entre los niveles Linear RAID y RAID 0? ¿Qué clase de redundancia ofrece cada uno? ¿Contra qué eventos protege?
-	\item Preparar un arreglo linear RAID sobre dos dispositivos loop. Observe qué relación tiene el espacio disponible en el dispositivo con los archivos que soportan los dispositivos loop.
-	\item Preparar un arreglo linear RAID sobre dos discos extra agregados al equipo. 
-	\item Preparar un arreglo RAID nivel 0 sobre dos discos extra agregados al equipo. 	
-	\item ¿Puede medir la diferencia en performance entre los dispositivos de   los ejercicios anteriores, de linear RAID y de nivel 0? ¿Tiene sentido esta medición cuando el equipo es una máquina virtual? 
-	\item Preparar un RAID nivel 1 sobre dos discos extra. Inyectar un fallo en uno de los discos. Agregar un nuevo disco e incorporarlo al RAID. Observar la sincronización del dispositivo.
-	\item Como antes, preparar un RAID nivel 1 sobre dos discos extra, pero con una unidad \emph{spare}. Inyectar un fallo en uno de los discos y observar el comportamiento del dispositivo. 
-	\item Retire el disco fallado y compruebe en qué estado queda el dispositivo.
-	\item Vuelva a agregar el disco y compruebe en qué estado queda el dispositivo. 
-	\item ¿Con qué comandos se investiga el estado de un dispositivo RAID? ¿Cómo se sabe cuándo un dispositivo RAID está activo o en modo degradado? ¿Cómo se sabe cuándo un dispositivo está fallado, activo, sincronizando?
-	\item ¿Cuál es la forma de convertir en dispositivo RAID 1 un filesystem ya existente?
-	\item ¿Cómo se puede adaptar el comportamiento de un RAID 1 a una situación con discos asimétricos (uno más rápido que el otro)?
+%\subsection {Temas de práctica}
+%\begin{enumerate}
+%	\item ¿Qué marcas, modelos y precios de tarjetas controladoras RAID puede encontrar? ¿Con qué capacidades?
+%	\item ¿Qué diferencias hay entre Software RAID y Hardware RAID?
+%	\item ¿Qué niveles RAID ofrecen redundancia? ¿Contra qué eventos protege esta redundancia? ¿Contra qué eventos \emph{no} protege esta redundancia? 
+%	\item El uso de un dispositivo RAID, ¿es un reemplazo efectivo para las políticas y actividades de backup?
+%	\item ¿Cuáles niveles RAID ofrecen mejor velocidad de trabajo? ¿De qué factores depende la ventaja en performance de los diferentes niveles RAID entre sí y con respecto al uso de una única unidad de disco?
+%	\item ¿Cuál es la diferencia entre los niveles Linear RAID y RAID 0? ¿Qué clase de redundancia ofrece cada uno? ¿Contra qué eventos protege?
+%	\item Preparar un arreglo linear RAID sobre dos dispositivos loop. Observe qué relación tiene el espacio disponible en el dispositivo con los archivos que soportan los dispositivos loop.
+%	\item Preparar un arreglo linear RAID sobre dos discos extra agregados al equipo. 
+%	\item Preparar un arreglo RAID nivel 0 sobre dos discos extra agregados al equipo. 	
+%	\item ¿Puede medir la diferencia en performance entre los dispositivos de   los ejercicios anteriores, de linear RAID y de nivel 0? ¿Tiene sentido esta medición cuando el equipo es una máquina virtual? 
+%	\item Preparar un RAID nivel 1 sobre dos discos extra. Inyectar un fallo en uno de los discos. Agregar un nuevo disco e incorporarlo al RAID. Observar la sincronización del dispositivo.
+%	\item Como antes, preparar un RAID nivel 1 sobre dos discos extra, pero con una unidad \emph{spare}. Inyectar un fallo en uno de los discos y observar el comportamiento del dispositivo. 
+%	\item Retire el disco fallado y compruebe en qué estado queda el dispositivo.
+%	\item Vuelva a agregar el disco y compruebe en qué estado queda el dispositivo. 
+%	\item ¿Con qué comandos se investiga el estado de un dispositivo RAID? ¿Cómo se sabe cuándo un dispositivo RAID está activo o en modo degradado? ¿Cómo se sabe cuándo un dispositivo está fallado, activo, sincronizando?
+%	\item ¿Cuál es la forma de convertir en dispositivo RAID 1 un filesystem ya existente?
+%	\item ¿Cómo se puede adaptar el comportamiento de un RAID 1 a una situación con discos asimétricos (uno más rápido que el otro)?
 	
-\end{enumerate}
+%\end{enumerate}
