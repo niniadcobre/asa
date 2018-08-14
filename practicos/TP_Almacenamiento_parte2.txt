@@ -38,13 +38,16 @@ NOTA: utilice loop devices para hacer pruebas.
         al iniciar el sistema con estos dispositivos?
      c) ¿Qué sucede si el dispositivo a utilizar en un array contiene un 
         sistema de archivos?¿Qué sucederá con los datos al crear el array?
+     d) Observe las opciones "--examine" y "--query --detail" del programa 
+        mdadm. ¿Qué información provee cada una? ¿Sobre qué tipo de 
+        dispositivos aplican? 
 
 9) ¿Cuál es la diferencia entre los niveles Linear RAID y RAID 0? ¿Qué clase de 
    redundancia ofrece cada uno? ¿Contra qué eventos protege?
 
 10) Crear un dispositivo md LINEAR, RAID 0, RAID 1, RAID5, RAID10 y RAID1+0 
    anidado. Observe en cada caso la relación del espacio utilizable y el 
-   espacio total necesario para armar cada configuración. 
+   espacio total necesario para armar cada configuración.  
 
 11) Preparar un RAID nivel 1 sobre dos dispositivos loop. Particionar, crear 
     un sistema de archivos en él y montarlo. 
@@ -52,6 +55,8 @@ NOTA: utilice loop devices para hacer pruebas.
       b. Agregar un nuevo disco e incorporarlo al RAID. 
       c. Observar la sincronización del dispositivo. ¿Se ve afectado el uso del
     sistema de archivos? 
+      d. Incorpore monitoreo y verifique su funcionamiento: ver "Construcción 
+         y uso de un array RAID1 en el apunte de cátedra". 
 
 12) Como antes, preparar un RAID nivel 1, particionada y con sistema de 
     archivos, pero con una unidad spare. 
@@ -76,3 +81,9 @@ NOTA: utilice loop devices para hacer pruebas.
 15) ¿Cuál es la forma de convertir en dispositivo RAID 1 un sistema de archivos
      ya existente? (opción --build). 
 	
+16) Indique un procedimiento para desarmar un dispositivo Linux md. ¿Qué sucede
+    con los datos del dispositivo al seguir el procedimiento? Verifique que los
+    metadatos fueron efectivamente removidos. 
+
+17) ¿Qué ventajas tiene esta nueva forma de administrar el almacenamiento frente
+    al esquema de particionado tradicional? ¿Qué desventaja encuentra? 
