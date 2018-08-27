@@ -1,23 +1,67 @@
 #############################
-# ASA - 2016 - Almacenamiento
+# ASA - 2018 - Almacenamiento
+# Logical Volume Manager   
 #############################
 
-NOTA: estos prácticos son COMPLEMENTARIOS a la ejercitación propuesta en el 
-apunte de cátedra. 
+1) Indique todos los componentes de software necesarios para implementar 
+gestión de almacenamiento con LVM2. 
 
-NOTA: utilice loop devices para probar en el laboratorio.  
+2) ¿Dónde se almacenan los metadatos de LVM?¿Para qué sirven?
 
-1) Crear un dispositivo md LINEAR, RAID 0, RAID 1, RAID5 y RAID10
+3) ¿Qué sistemas de archivos están soportados por la opción -r de los comandos
+   de re-dimensión? ¿Qué sucede si el sistema de archivos contenido no está 
+   soportado? Indique un procedimiento en cada caso, tanto para extender como
+   para reducir el sistema de archivos. 
 
-2) Armar una tabla comparativa de LINEAR, RAID 0, RAID 1, RAID 5 y RAID10
-con al menos: 
-	Tolerancia a fallos 
-	Performance de lectura 
-	Performance de escritura 
-	Mínima cantidad de discos necesarios.
-	Porcentaje de espacio utilizable para datos 
+4) Indique los niveles de RAID provistos por LVM. 
 
-3) ¿Dónde se almacena la información acerca del array? 
+5) Crear un LV RAID 5 y observar su distribución entre los distintos discos
+   que componen el VG.   
 
-4) ¿Es posible trasladar un array entre dos máquinas? ¿Qué se necesita? Escriba
-un procedimeinto y realice la prueba. 
+6) ¿Qué diferencias observa entre implementar RAID a nivel de LV o hacerlo  
+   a nivel de discos con Linux MD? 
+
+7) Analice las posibilidades de re-dimensión (extender y reducir) de los 
+   sistemas de archivos: fat, ext2/3/4, ntfs, btrfs, xfs, vxfs, reiserfs. 
+  ------------------------------------------------------------------------
+  |Sistema de archivos | extender | online | reducir | online | licencia |
+  ------------------------------------------------------------------------
+  |ext2                |          |        |         |        |          |
+  ------------------------------------------------------------------------
+  |ext3                |          |        |         |        |          |
+  ------------------------------------------------------------------------
+  |ext4                |   si     |   si   |   si    |   no   |  LIBRE   |
+  ------------------------------------------------------------------------
+  |fat                 |          |        |         |        |          |
+  ------------------------------------------------------------------------
+  |...                 |          |        |         |        |          |
+  ------------------------------------------------------------------------
+
+8) ¿Existen servicios en ejecución en relación a LVM? En ese caso ¿Qué función
+   cumplen? 
+
+9) Piense en la secuencia de arranque de un sistema (man boot). 
+      * Firmware -> gestor de arranque -> Kernel -> Sistema de archivo raíz 
+      * Firmware UEFI bien implementado  -> Kernel -> Sistema de archivo raíz 
+   ¿Qué relación existe entre los componentes al elegir una determinada tabla 
+   de particiones? 
+   ¿Qué dependencia existe entre los componentes si implementamos Linux md?
+   ¿Qué dependencia existe entre los componentes si implementamos LVM?
+   ¿Es posible crear un sistema de archivos raíz bajo Linux md?
+   ¿Es posible crear un sistema de archivos raíz bajo LVM?
+   ¿Qué sucede con el directorio /boot?
+  
+10) Escriba un procedimiento para importar/exportar discos bajo LVM y Linux md
+    Verifique con los discos provistos por la cátedra. 
+
+    * Pasos para incorporar los discos al sistema (loop devices).
+    * Pasos para importar los discos bajo el software adecuado (LVM/md).
+    * Pasos para montar los sistemas de archivos contenidos. Verificar su 
+      contenido en cada caso.
+    * Pasos para exportar/detener los dispositivos lógicos creados por LVM o md.
+    * Pasos para remover los dispositivos loop y volver al estado original.
+ 
+ En todos los casos agregue los comandos necesarios para verificar el progreso
+ del procedimiento. Asuma que va a ser utilizado por otro administrador de 
+ sistemas. 
+
