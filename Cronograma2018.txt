@@ -50,20 +50,21 @@ AGOSTO
 
 SEPTIEMBRE
 5  Semana 4/9
-	Almacenamiento  
+	Estrategias de respaldo
 6  Semana 11/9
-	Estrategias de respaldo
+        Repaso	
 7  Semana 18/9
-	Estrategias de respaldo
+	Examen parcial - Martes 18 
+        Jueves Alta Disponibilidad
 8  Semana 25/9
-	Examen parcial  
+	Alta disponibilidad
 
 OCTUBRE
 9  Semana 2/10
+        Recuperatorio - Martes 2
 	Alta disponibilidad 
 10 Semana 9/10
 	Martes Alta disponibilidad  
-        Recuperatorio 
 11 Semana 16/10
 	Alta disponibilidad 
 12 Semana 23/10
