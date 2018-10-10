@@ -57,14 +57,16 @@ SEPTIEMBRE
 	Examen parcial - Martes 18 
         Jueves Alta Disponibilidad
 8  Semana 25/9
-	Alta disponibilidad
+        Martes - paro general transporte
+	Jueves consulta recuperatorio 
 
 OCTUBRE
 9  Semana 2/10
         Recuperatorio - Martes 2
-	Alta disponibilidad 
+	Alta disponibilidad - comienzo cluster
 10 Semana 9/10
-	Martes Alta disponibilidad  
+	Martes clase suspendida x Miriam 
+        Jueves continuamos cluster hasta sección 5 
 11 Semana 16/10
 	Alta disponibilidad 
 12 Semana 23/10
