@@ -62,7 +62,8 @@ NOTA: utilice loop devices para hacer pruebas.
     archivos, pero con una unidad spare. 
       a. Inyectar un fallo en uno de los discos y observar el comportamiento 
       del dispositivo. 
-      b. Retire el disco fallado y compruebe en qué estado queda el dispositivo.      ¿Se ve afectado el uso del sistema de archivos? 
+      b. Retire el disco fallado y compruebe en qué estado queda el dispositivo.      
+      ¿Se ve afectado el uso del sistema de archivos? 
       c. Vuelva a agregar el disco y compruebe en qué estado queda el 
       dispositivo.
 
