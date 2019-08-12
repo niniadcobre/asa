@@ -38,7 +38,7 @@ AGOSTO
 1  Semana (13/15)
 	Inicio de clases / Almacenamiento
 2  Semana (20/22)
-        Almacenamiento - md 
+        Almacenamiento - md / exposición FS. 
 3  Semana (27/29)
 	Almacenamiento  - LVM 
 
