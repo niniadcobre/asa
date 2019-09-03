@@ -1,7 +1,12 @@
 #############################
-# ASA - 2018 - Almacenamiento
+# ASA - 2019 - Almacenamiento
 # Logical Volume Manager   
 #############################
+
+NOTA: acerca de los procedimientos. Deben estar escritos asumiendo que quien 
+      va a ejecutar el mismo es un/a administrador/a de sistemas pero que no 
+      es experto en la tecnología en cuestión. Debe incluir todas las 
+      validaciones necesarias.     
 
 1) Indique todos los componentes de software necesarios para implementar 
 gestión de almacenamiento con LVM2. 
@@ -29,7 +34,7 @@ gestión de almacenamiento con LVM2.
   |ext2                |          |        |         |        |          |
   ------------------------------------------------------------------------
   |ext3                |          |        |         |        |          |
-  ------------------------------------------------------------------------
+  -----------------------------------------------------------------------
   |ext4                |   si     |   si   |   si    |   no   |  LIBRE   |
   ------------------------------------------------------------------------
   |fat                 |          |        |         |        |          |
@@ -61,7 +66,24 @@ gestión de almacenamiento con LVM2.
     * Pasos para exportar/detener los dispositivos lógicos creados por LVM o md.
     * Pasos para remover los dispositivos loop y volver al estado original.
  
- En todos los casos agregue los comandos necesarios para verificar el progreso
- del procedimiento. Asuma que va a ser utilizado por otro administrador de 
- sistemas. 
 
+11) Escriba un procedimiento para realizar el backup del directorio /home y sub-
+    directorios. 
+    - utilice snapshot. ¿Qué consideración verificación debe hacer sobre los 
+      sistemas de archivos? Piense acerca de cómo pueden estar distribuidos los
+      sistemas de archivos.  
+    - Asuma que se utiliza un directorio NFS remoto para almacenar dicho backup. 
+12) Ud. ha observado que un disco (sda) está comenzando a fallar. Sobre el 
+    mismo se encuentran varios LVs. Escriba un procedimiento para mover todos
+    los LVs de el disco en cuestión a un nuevo disco (sdb). Indique las consi-
+    deraciones de tamaño que debe contemplar el/la administrador/a. 
+    - ¿Qué sucede con su procedimiento si uno de los LVs es un mirror?  
+
+
+13) ¿Cómo distribuiría los sistemas de archivos utilizando LVM en una 
+    instalación de escritorio típica? Asuma que posee dos discos de 1TB. 
+
+14) Realizar los ejercicios propuestos en "Temas de práctica" del apunte de 
+    cátedra de la sección de LVM. 
+
+15) ¿Qué significa el código de color de los discos rígidos?
