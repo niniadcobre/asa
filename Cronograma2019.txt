@@ -47,24 +47,26 @@ SEPTIEMBRE
 	Almacenamiento LVM - Cuestionario 
 5  Semana (10/12)
 	Estrategias de respaldo
-        Jueves 12 - Aniversario Ciudad de Neuquén
+        Jueves 12 - Aniversario Ciudad de Neuquén, aún no se ha confirmado 
+        asueto. 
 6  Semana (17/19)
-        17 - Día del profesor suele haber asueto 
+        Martes charla de café obligatoria - sistemas de apoyo backup
+        17 - Día del profesor, no hay clases. 
 7  Semana (24/26)
-	Examen parcial - Martes 18 
+	Martes Examen parcial 
         Jueves Alta Disponibilidad
 
 OCTUBRE
 8  Semana (1/3)
-        Martes - paro general transporte
-	Jueves consulta recuperatorio 
+        Martes Alta Disponibilidad / consulta recuperatorio 
+	Recuperatorio  
 9  Semana (8/10)
-        Recuperatorio - Martes 2
 	Alta disponibilidad - comienzo cluster
 10 Semana (15/17)
-        Jueves continuamos cluster hasta sección 5 
+	Alta disponibilidad - cluster
 11 Semana (22/24)
 	Alta disponibilidad 
+	Virtualización 
 12 Semana (29/31)
 	Virtualización 
 
