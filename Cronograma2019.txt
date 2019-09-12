@@ -50,8 +50,8 @@ SEPTIEMBRE
         Jueves 12 - Aniversario Ciudad de Neuquén, aún no se ha confirmado 
         asueto. 
 6  Semana (17/19)
-        Martes charla de café obligatoria - sistemas de apoyo backup
-        17 - Día del profesor, no hay clases. 
+        Martes 17 - Día del profesor, no hay clases. 
+        Jueves charla de café obligatoria - sistemas de apoyo backup
 7  Semana (24/26)
 	Martes Examen parcial 
         Jueves Alta Disponibilidad
