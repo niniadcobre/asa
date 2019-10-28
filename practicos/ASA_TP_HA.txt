@@ -1,6 +1,6 @@
 
   #####################
-  # ASA - TUASSL 2018 #
+  # ASA - TUASSL 2019 #
   #   HA - TP01	      #
   #####################
 
@@ -15,10 +15,10 @@ Fuente de documentación: http://clusterlabs.org/
 PASOS PRELIMINARES: 
 1. Configurar un hostname distinto para cada nodo. 
 2. Cambiar la contraseña de root. 
-3. Observar la configuración de los dispositivos de almacenamiento y sistemas 
+3. Documentar la configuración de los dispositivos de almacenamiento y sistemas 
    de archivos.
 4. Cuál es el archivo que identifica la versión de Centos del sistema. 
-5. Observe la configuración de red. 
+5. Documente la configuración de red. 
 6. ¿Utiliza systemd o init? 
 7. ¿Cuál es el objetivo final del laboratorio? 
 
