@@ -31,7 +31,7 @@ completo.
    información provista por "docker info" 
 
 4) ¿Qué provee el sitio https://hub.docker.com/? ¿Cómo se relaciona 
-   con el comando "docker search"? Ej: docker search arch. 
+   con el comando "docker search"? Ej: docker search debian
    ¿Qué información indica el encabezado? 
 
 5) Observe el listado de imágenes coincidentes con la palabra httpd y apache. 
@@ -49,7 +49,10 @@ completo.
    Observe la información en: 
    https://hub.docker.com/_/httpd/
 
-7) Observe el ciclo de vida de un _container_ según los slides de clase. ¿Ah 
+7) Observe las diferentes arquitecturas para las que se provee ua imagen. 
+   ¿Hay dependendica entre la imágen y la arquitectura de hardware del host?
+
+8) Observe el ciclo de vida de un _container_ según los slides de clase. ¿Ah 
    creado algún container hasta este punto? 
 
 9) Cree tres containers a partir de la imagen httpd. El parámetro 
@@ -95,7 +98,8 @@ completo.
         docker top <nombre container> 
         docker stats <nombre container> 
 
-   b) ¿Son el nombre del container y el hostname iguales? 
+   b) ¿Son el nombre del container y el hostname iguales? Indique las opciones
+      en el comando docker run que permiten cambiar ambos.  
    c) ¿Cuál es la distribución del container httpd? 
 
 13) Introducción: A partir de que se ejecuta (run) un container a partir de una
