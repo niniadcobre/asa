@@ -1,7 +1,7 @@
 Cronograma 2020
 
 El siguiente cronograma es TENTATIVO y sujeto a modificaciones que serán 
-debidamente informadas en clase y PEDCO.
+debidamente informadas en Telegram y PEDCO.
                                             
 Inicio de clases: 24/08 
 Fin de clases: 11/12  
@@ -16,62 +16,61 @@ do lu ma mi ju vi sá  do lu ma mi ju vi sá  do lu ma mi ju vi sá
 23 24 25 26 27 28 29  27 28 29 30           25 26 27 28 29 30 31  
 30 31                                                             
 
-   Noviembre 2020     
-do lu ma mi ju vi sá  
- 1  2  3  4  5  6  7  
- 8  9 10 11 12 13 14  
-15 16 17 18 19 20 21  
-22 23 24 25 26 27 28  
-29 30                 
-                      
+   Noviembre 2020        Diciembre 2020     
+do lu ma mi ju vi sá  do lu ma mi ju vi sá  
+ 1  2  3  4  5  6  7         1  2  3  4  5  
+ 8  9 10 11 12 13 14   6  7  8  9 10 11 12  
+15 16 17 18 19 20 21  13 14 15 16 17 18 19  
+22 23 24 25 26 27 28  20 21 22 23 24 25 26  
+29 30                 27 28 29 30 31        
+                                            
+
 Total semanas: 16 
 
 Clases:
 	Martes 16-20 
 	Jueves 16-20
 
-AGOSTO
-1  Semana (27/8)
+AGOSTO 
+1  Semana (27 de agosto)
 	Inicio de clases / Almacenamiento
-2  Semana (01/03 septiembre)
-        Almacenamiento - md 
-3  Semana (08/10 septiembre)
-	Almacenamiento  - LVM 
-
+2  Semana (01 y 03 septiembre)
+        Almacenamiento 
 SEPTIEMBRE
-4  Semana (3/5)
-	Almacenamiento LVM - Cuestionario 
-5  Semana (10/12)
+3  Semana (08 y 10 septiembre)
+	Almacenamiento  - Linux MD  
+        Martes 08/09 Entrega TPO sistemas de archivos
+4  Semana (15 y 17 septiembre)
+	Almacenamiento LVM 
+        Jueves 17 - Entrega TPO Linux MD
+5  Semana (22 y 24 septiembre)
+	Almacenamiento LVM 
+6  Semana (29/09 y 01/10)
 	Estrategias de respaldo
-6  Semana (17/19)
-        Martes 17 - Día del profesor, no hay clases. 
-        Jueves charla de café obligatoria - sistemas de apoyo backup
-7  Semana (24/26)
-	Martes Examen parcial 
-        Jueves Alta Disponibilidad
-
-OCTUBRE
-8  Semana (1/3)
-        Martes Alta Disponibilidad / consulta recuperatorio 
-	Recuperatorio  
-9  Semana (8/10)
-	Alta disponibilidad - comienzo cluster
-10 Semana (15/17)
+OCTUBRE 
+7  Semana (06 y 08 octubre)
+        Martes 06 Alta Disponibilidad - Entrega TPO LVM 
+	Jueves 08 Examen parcial - Almacenamiento y respaldo  
+8  Semana (13 y 15 de octubre)
+        Alta Disponibilidad - comienzo cluster 
+9  Semana (20 y 22 octubre)
+	Alta disponibilidad - cluster 
+10 Semana (27 y 29 octubre)
 	Alta disponibilidad - cluster
-11 Semana (22/24)
-	Alta disponibilidad 
-	Virtualización 
-12 Semana (29/31)
-	Virtualización 
-
 NOVIEMBRE
-13 Semana (5/7)
+11 Semana (03 y 05 noviembre)
+	03 Virtualización  - Entrega TPO Alta disponibilidad
+        05 Examen parcial -  Alta disponibilidad  
+12 Semana (10 y 12 noviembre)
+	Virtualización 
+13 Semana (17 y 19 noviembre)
         Virtualización
-14 Semana (12/14)
-	Examen parcial - Jueves 
-15 Semana  (19/21)
-	A determinar
-16  Semana (26/28)
-	Recuperatorio - Jueves 
-
-
+14 Semana (24 y 26 noviembre)
+        24 Entrega TP0 Virtualización 
+	26 Examen parcial - Virtualización 
+DICIEMBRE
+15 Semana  (01 y 03 diciembre)
+        Jueves 03 - Recuperatorio integral por temas
+16  Semana (88 y 11 diciembre)
+        8 de diciembre feriado 
+        A determinar

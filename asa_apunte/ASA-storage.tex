@@ -1,43 +1,68 @@
+
 \section{Contenidos}
 
+En esta sección se desarrollan contenidos relacionados a la gestión de almacenamiento masivo. Incluyendo conceptos y tecnologías. Los temas comprendidos serán: 
+
 \begin{enumerate}
-	\item Arquitectura de E/S, Dispositivos de E/S, Filesystems
-	\item	Software RAID, instalación y mantenimiento, niveles 0, 1, 10, 5.
-	\item	LVM, instalación y mantenimiento
+	\item   Arquitectura de E/S, Dispositivos de E/S (particionado), Filesystems (sistemas de archivos). 
+	\item	Software RAID (implementación Linux MD), instalación y mantenimiento, niveles 0, 1, 10, 5.
+	\item	Manejadores de volúmenes lógicos (implementación de LVM), instalación y mantenimiento
 	\item	Diseños típicos de almacenamiento
 \end{enumerate}
 
 
-\section{Dispositivos y filesystems}
-Los dispositivos lógicos de bloques están asociados a algún medio de almacenamiento, real o virtual.  Ejemplos de dispositivos de bloques que encontramos con frecuencia son \lstinline$/dev/sda, /dev/sda1, /dev/dvd$, etc.
+\section{Dispositivos y sistemas de archivos (filesystems)}
 
-\figura[14]{IO}{I/O y dispositivos}{IO.jpg} 
+\subsection{Dispositivos lógicos}
+Los \textbf{dispositivos lógicos de bloques} están asociados a algún medio de almacenamiento, real o virtual.  Ejemplos de dispositivos de bloques que encontramos con frecuencia son \lstinline$/dev/sda, /dev/sda1, /dev/dvd$, etc. Estos estarán asociados a algún medio, como puede ser un disco  magnético, una memoria de estado sólido o un archivo dentro de un sistema de archivos, por mencionar algunas posibilidades. En general se encontrarán bajo el directorio \lstinline$/dev$ dentro de la FSH (Filesystem Hierarchy).
 
 
-\nonota{Presentan una interfaz que provee direccionamiento random o directo, es decir, sus bloques están numerados y se puede acceder a cualquier bloque con independencia de cuál haya sido accedido anteriormente (operación de \emph{seek}). Pueden directamente contener un filesystem u ofrecer soporte a otros dispositivos virtuales, que los agrupan (como los dispositivos RAID) o en general los utilizan (como los dispositivos snapshot de LVM). Los típicos dispositivos de bloques con los que nos encontramos son los discos y las particiones, pero es interesante conocer otros dispositivos que están soportados por volúmenes lógicos, archivos, u otros, remotos, que se acceden por medio de la red.}
+Los dispositivos lógicos presentan una interfaz que provee direccionamiento random o directo, es decir, sus bloques están numerados y se puede acceder a cualquier bloque con independencia de cuál haya sido accedido anteriormente (operación de \emph{seek}). Pueden directamente contener un sistema de archivos u ofrecer soporte a otros dispositivos virtuales, que los agrupan (como los dispositivos RAID) o en general los utilizan (como los dispositivos snapshot de LVM). Los dispositivos de bloques más usuales con los que nos encontramos son los discos y las particiones, pero es interesante conocer otros dispositivos que están soportados por volúmenes lógicos, archivos, u otros, remotos, que se acceden por medio de la red. 
 
-%\subsection{Temas de práctica}
-%\begin{enumerate}
-%	\item Crear y destruir particiones con fdisk, parted, gparted. 
-%	\item Reconocer tipos de particiones. Comprender la estructura de la tabla de particiones. MBR/BIOS particiones primarias, extendidas y lógicas. UEFI/GPT. 
-%	\item Comando dd, modificadores bs y count. Copia de dispositivos y archivos.
-%	\item Dispositivos /dev/null y /dev/zero. Creación de archivos prealojados. Modificador seek. fallocate. 
-%	\item Comando mkfs. Tipo de filesystem. Filesystems sobre una partición, sobre un archivo.
-%	\item Loop devices. Comando losetup. Comando mount. Opciones ro, loop, offset. Montado de filesystems sobre una partición física, sobre un archivo, sobre una partición en una imagen de disco.
-%	\item Redimensionamiento de filesystems. Comando dd y modificador conv=notrunc. Comando resize2fs. Opciones relacionadas con filesystems en parted.
-%\end{enumerate}
+Desde el punto de vista del administrador/ora de sistemas, los archivos de dispositivo serán el medio para interactuar y gestionar el espacio provisto por el medio virtual o físico que representan. Es así que, por ejemplo, a través de una herramienta como fdisk, podemos dar una estructura al espacio en un disco magnético a través de la creación de una tabla de particiones sobre el dispositivo lógico asociado, por ejemplo: \lstinline$fdisk /dev/sda$ 
 
-\subsection{Loop devices}
+\begin{figure}[H]
+\begin{center}
+        \includegraphics[scale=0.5, angle=0.0]{img/IO.jpg}
+        \caption{Esquema IO y dispositivos}
+        \label{module}
+\end{center}
+%\figura[14]{IO}{I/O y dispositivos}{IO.jpg} 
+\end{figure}
+\subsection{Dispositivos de bucle (loop devices)}
+
+Los dispositivos de bucle (\lstinline$/dev/loop*$) de los 
+sistemas GNU/Linux nos permiten \textbf{asociar} 
+un archivo de dispositivo (bajo el directorio \lstinline$/dev$) con un 
+\textbf{archivo
+regular} dentro de un sistema de archivos. Esta funcionalidad nos permite, por 
+ejemplo, montar un sistema de archivos que se encuentre contenido dentro del 
+archivo regular (como puede ser una imagen ISO), o realizar pruebas simulando
+la presencia de múltiples dispositivos. 
+
+Dentro de esta asignatura se desarrollarán tecnologías que permiten la 
+combinación de distintos medios de almacenamiento, con diferentes fines, 
+por lo que utilizaremos los dispositivos de bucle para simular una 
+infraestructura con múltiples discos físicos. 
+
+La siguiente secuencia muestra la forma en que utilizaremos los dispositivos
+de bucle con un ejemplo.
+
 \begin{lstlisting}
+Creando archivos regulares: 
 $ dd if=/dev/zero of=imagen.img bs=1024 count=1024
 1024+0 records in
 1024+0 records out
 1048576 bytes (1.0 MB) copied, 0.00223564 s, 469 MB/s
 $ ls -l imagen.img
 -rw-r--r-- 1 root root 1048576 Sep  1 11:54 imagen.img
+
+Asociando dispositivos loop a archivos regulares: 
 $ losetup /dev/loop0 imagen.img
 $ losetup -a
 /dev/loop0: [0808]:2260385 (/tmp/imagen.img)
+
+Creando sistema de archivos en el dispositivo asociado: 
 $ mkfs -t ext3 /dev/loop0
 mke2fs 1.42.8 (20-Jun-2013)
 
@@ -60,6 +85,7 @@ Allocating group tables: 0/1	done
 Writing inode tables: 0/1	done                            
 Writing superblocks and filesystem accounting information: 0/1	done
 
+Montando el sistema de archivos para su uso: 
 $ mkdir mnt
 $ mount -o loop /dev/loop0 mnt
 $ df -h mnt
@@ -68,6 +94,8 @@ Filesystem      Size  Used Avail Use% Mounted on
 $ ls -l mnt
 total 12
 drwx------ 2 root root 12288 Sep  1 11:54 lost+found
+
+Utilizando el sistema de archivos: 
 $ ls / > mnt/lista.txt
 $ ls -l mnt
 total 13
@@ -76,16 +104,22 @@ drwx------ 2 root root 12288 Sep  1 11:54 lost+found
 $ df -h mnt
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/loop0     1003K   18K  914K   2% /tmp/mnt
+
+Redimension del archivo regular de base, aumento: 
 $ dd if=/dev/zero of=imagen.img bs=1024 count=1024 oflag=append conv=notrunc
 1024+0 records in
 1024+0 records out
 1048576 bytes (1.0 MB) copied, 0.00206669 s, 507 MB/s
 $ ls -l imagen.img
 -rw-r--r-- 1 root root 2097152 Sep  1 11:54 imagen.img
+
+Indicando al mecanismo de bucle el cambio en el archivo regular: 
 $ losetup -c /dev/loop0
 $ losetup -a
 /dev/loop0: [0808]:2260385 (/tmp/imagen.img)
 /dev/loop1: [0005]:5178 (/dev/loop0)
+
+Redimension del sistema de archivos contenido en el dispositivo: 
 $ umount mnt
 $ e2fsck -fp /dev/loop0
 /dev/loop0: 12/128 files (0.0% non-contiguous), 39/1024 blocks
@@ -94,12 +128,50 @@ resize2fs 1.42.8 (20-Jun-2013)
 Resizing the filesystem on /dev/loop0 to 2048 (1k) blocks.
 The filesystem on /dev/loop0 is now 2048 blocks long.
 
-$ mount -o loop /dev/loop0 mnt
+Puesta en funcionamiento del cambio: 
+$ mount /dev/loop0 mnt
 $ df -h mnt/
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/loop0      2.0M   18K  1.9M   1% /tmp/mnt
 
 \end{lstlisting}
+
+\subsection{Sistemas de archivos}
+
+Los sistemas de archivos son piezas de software fundamentales del sistema operativo que 
+permiten el uso de los dispositivos de almacenamiento por parte de los usuarios
+del sistema. Sin sistemas de archivos la organización del espacio de almacenamiento sería una tarea ardua. El sistema de archivos será entonces el software que 
+permite la gestión del espacio disponible en un dispositivo, a través de la 
+creación de estructuras lógicas (metadatos) dentro del espacio de almacenamiento, que permiten la gestión del mismo. Estas estructuras son las que se crean 
+dentro del espacio de almacenamiento al utilizar comandos como \lstinline$mkfs$. Los metadatos ocupan un espacio en sí mismos, es por esto que, al crear
+el sistema de archivos, el tamaño utilizable resultante es menor al espacio
+real disponible. La elección del tipo de sistema de archivos también 
+impactará en este sentido, habrá sistemas de archivos con metadatos más 
+complejos y otros con metadatos más simples. 
+
+Existen múltiples sistemas de archivos, con características diversas y finalidades distintas. Todos ellos tienen como fin gestionar el espacio. Encontramos sistemas simples, como FAT, hasta extremadamente complejos como puede ser btrfs. 
+
+La elección de un sistema de archivos particular depende del uso y las
+características del almacenamiento subyacente, así como del soporte provisto
+por el sistema operativo. Elegiremos sistemas de archivos
+distintos para un pendrive, que para un disco magnético. Evaluaremos si 
+se alojarán archivos grandes o pequeños, etc. A continuación presentamos un 
+conjunto de preguntas que deberíamos responder al momento de elegir 
+el software más adecuado: 
+
+\begin{itemize}
+\item ¿Sobre qué medio físico voy a crear dicho sistema?
+\item ¿Cuál es el tamaño del sistemas de archivos?
+\item ¿Cuál es el tamaño esperable de los archivos a almacenar?
+\item ¿Es esperable que el sistema de archivos crezca?
+\item ¿Tasa anual de crecimiento?
+\item ¿Performance del sistema de archivos a largo plazo? (fragmentación).
+\item ¿Cuál es el estado de desarrollo del software en el sistema
+operativo destino?
+\item ¿Puedo migrar de un sistema de archivos a otro?
+\item El sistema de archivos considerado ¿está soportado en el sistema
+operativo destino?
+\end{itemize}
 
 \input{ASA-RAID}
 

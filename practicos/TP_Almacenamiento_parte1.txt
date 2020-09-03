@@ -1,6 +1,11 @@
 ######################################
-# ASA - 2019 - Almacenamiento - PARTE1
+# ASA - 2020 - Almacenamiento - PARTE1
 ######################################
+
+El siguiente práctico tiene como fin revisar conceptos vistos con anterioridad
+en materias previas, e incorporar herramientas técnicas que sientan las bases
+para el trabajo con tecnologías de almacenamiento más complejas. 
+
 
 Dispositivos loop (bucle)
 =========================
@@ -67,19 +72,23 @@ Archivos prealojados/dispersos
 Archivo prealojado: una aplicación necesita reservar espacio antes de usarlo
 efectivamente (antes de tener los datos a escribir). Esto es crear las 
 estructuras internas que representan al archivo dentro del sistema de archivos 
-y, reservar los bloques.  Las opciones son escribir ceros o utilizar archivos 
-dispersos provistos por el sistema de archivos. 
+y, reservar los bloques donde se almacenarán los datos reales.  Las opciones 
+son escribir ceros o utilizar archivos dispersos provistos por el sistema 
+de archivos. 
 
 1) ¿Todos los sistemas de archivos implementan archivos dispersos?
 
 2) ¿Cómo reconocer un archivo disperso? Observar los comandos du, ls y find. 
 
-3) Crear un archivo de 100Mb utilizando fallocate, dd y truncate. Tomar 
+3) Crear un archivo de 500Mb utilizando fallocate, dd y truncate. Tomar 
 los tiempos en cada caso (comando time) ¿Son archivos dispersos? 
 
 4) ¿Qué sucede al realizar una copia de un archivo disperso?¿Qué sucede si 
 hacemos la copia en un sistema de archivos que no implementa este tipo de
-archivos? Haga la prueba. Indique el sistema de archivos de origen y destino. 
+archivos? Haga la prueba. Indique el sistema de archivos de origen y destino.
+
+Ejemplo: ext4 soporta archivos dispersos mientras que fat no lo hace. Haga 
+la prueba entre estos dos sistemas y verifique con comandos lo que sucede.  
 
 5) ¿Es posible crear un archivo disperso mayor al espacio libre en el sistema
 de archivos? Realice el intento. 
@@ -98,13 +107,13 @@ soportan estas características? Ejemplifique.
 en el apunte de cátedra para "Loop devices" (Configuraciones de almacenamiento)
 Explique qué sucede en cada comando.  
 
-10) Elija un sistema de archivos soportado en GNU/Linux, investigue y 
-desarrolle una breve explicación de sus principales características. 
-(Martes 20 de agosto). 
-
 Dispositivos especiales
------------------------
-11) Investigue el funcionamiento del comando dd: 
+=======================
+Con el fin de manipular archivos de dispositivo y comprender mejor sus
+propiedades, así como el funcionamiento de herramientas relacionadas a los
+mismos se proponen en los siguientes ejercicios 
+
+10) Investigue el funcionamiento del comando dd: 
    
   a) dd of=archivo if=/dev/zero bs=1k count=5120. Tome el tiempo (time).
   b) dd of=archivo if=/dev/urandom bs=1k count=5120. Tome el tiempo (time).
@@ -117,7 +126,7 @@ Dispositivos especiales
    2) ¿Son archivos dispersos?
    3) ¿Qué función cumple los modificadores bs seek y count?
 
-12) Explique el efecto de la opción oflag=append y conv=notrunc de 
+11) Explique el efecto de la opción oflag=append y conv=notrunc de 
 dd en la siguiente secuencia.
 $ dd if=/dev/urandom of=archivo1 bs=1024k count=5 
 $ dd if=/dev/urandom of=archivo1 bs=512 count=1 oflag=append conv=notrunc 
@@ -127,3 +136,39 @@ s
       /dev/zero. 
    c) ¿Qué sucede si repetimos n veces el segundo comando? 
 
+
+Ejercicio integrador: 
+=====================
+Partiendo de un disco de 1GiB, escriba un procedimiento que indique: 
+a) Los pasos necesarios para particionarlo, creando una única partición con 
+   la mitad del espacio y un sistema de archivos de tipo ext4, y montar el 
+   mismo en un punto de montaje a elección.  
+b) Los pasos para re-dimensionar el sistema de archivos creado en el paso 
+   anterior de modo que utilice la totalidad del espacio. Considere la 
+   re-dimensión en caliente y offline. 
+
+
+###############################
+Trabajo práctico obligatorio 1:
+############################### 
+
+Elija e investigue un sistema de archivos de su preferencia. 
+    1) Documente su investigación en la wiki propuesta. 
+    2) Envíe un audio (o video opcional) a nuestro canal de Telegram contando 
+    las características del sistema de archivos elegido. Se trata de una 
+    exposición informal técnica, como si le contara a un administrador/ora 
+    amigo/a de qué se trata el sistema de archivos y cuáles son sus puntos 
+    principales de interés.  
+    3) El sistema de archivos no puede estar repetido entre los/las estudiantes,    por lo que debe comunicar en PEDCO el sistema de archivos elegido. 
+
+La investigación debe incluir al menos:  
+* Sitio oficial de referencia del desarrollo del software y/o documentación. 
+* Historia/cronología resumida: ¿desde hace cuánto que existe? ¿aún tiene 
+soporte y desarrollo? 
+* ¿Existen páginas man o info sobre el mismo? 
+* Sistema operativo en que suele estar disponible.
+* De ser posible un ejemplo: crear, montar/desmontar. Si no esta soportado para
+  hacer un ejemplo en vivo entonces proveer el procedimiento completo. 
+* Breve comentario de aspectos técnicos interesantes: tamaños máximos, 
+  posibilidad o no de re-dimensión, si tiene algún objetivo particular, o 
+  alguna restricción muy fuerte, etc.
