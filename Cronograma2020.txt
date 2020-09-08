@@ -42,8 +42,8 @@ SEPTIEMBRE
         Martes 08/09 Entrega TPO sistemas de archivos
 4  Semana (15 y 17 septiembre)
 	Almacenamiento LVM 
-        Jueves 17 - Entrega TPO Linux MD
 5  Semana (22 y 24 septiembre)
+        Martes 22 - Entrega TPO Linux MD
 	Almacenamiento LVM 
 6  Semana (29/09 y 01/10)
 	Estrategias de respaldo
