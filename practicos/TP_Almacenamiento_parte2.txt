@@ -101,6 +101,53 @@ NOTA: utilice loop devices para hacer pruebas o la VM propuesta por la cátedra.
 Trabajo práctico obligatorio 2:
 ############################### 
 
+Para la configuración de RAID que le es asignada más abajo desarrollar: 
+a) PROCEDIMIENTO para: crear, verificar, y configurar el mismo de modo que 
+   se monte automáticamente en el booteo. ¿Cuál sería la configuración en 
+   el archivo mdadm.conf?  
+b) Cree un dispositivo RAID del tipo asignado en una vm, cree un sistema de 
+   archivos a elección sobre el mismo, móntelo y cree contenido en él. El mismo
+   deberá quedar disponible para revisión de la cátedra.  
+c) ¿La configuración es tolerante a fallos? En caso de serlo ¿contra qué fallos
+   protege? 
+d) ¿Qué mejora presenta la configuración con respecto a un único disco?
+e) ¿Es posible aumentar su capacidad? Indique un PROCEDIMIENTO para hacerlo 
+   en caso de ser posible. 
 
+ALONSO, JOAQUIN ALEJANDRO
+RAID 0 
+
+GORDILLO COFRE, MAXIMILIANO JEREMIAS
+RAID 1  
+
+CALDERON LONGARINI, ERICK ANGEL
+RAID 5
+
+PIPPIA, MARTíN EDUARDO
+RAID 6   
+
+PASCAL, ALEXIS GUSTAVO
+RAID 10 (nativo Linux MD)
+
+JOFRE, CRISTIAN NICOLÁS
+RAID 1+0
+
+RIVERO, ANGEL LEONARDO
+RAID 0+1
+
+SANDOVAL, CLAUDIO MARTÍN
+LINEAR 
+
+TRECANAO, LUCAS EXEQUIEL
+RAID 4
+
+CARTER DE LA VEGA, DIEGO HERNÁN
+RAID 1 + 1 spare 
+
+GRECCO, MARIA SOL
+RAID 5 + 1 spare (particionar para simular 4 discos)
+
+YAÑÉZ, ALEJANDRA
+RAID 4 + 1 spare (particionar para simular 4 discos)
 
 
