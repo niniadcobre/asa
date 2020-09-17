@@ -1,5 +1,5 @@
 #############################
-# ASA - 2019 - Almacenamiento
+# ASA - 2020 - Almacenamiento
 # Logical Volume Manager   
 #############################
 
@@ -9,9 +9,10 @@ NOTA: acerca de los procedimientos. Deben estar escritos asumiendo que quien
       validaciones necesarias.     
 
 1) Indique todos los componentes de software necesarios para implementar 
-gestión de almacenamiento con LVM2. 
+   gestión de almacenamiento con LVM2. 
 
-2) ¿Dónde se almacenan los metadatos de LVM?¿Para qué sirven?
+2) ¿Dónde se almacenan los metadatos de LVM?¿Para qué sirven?¿Cuándo, y 
+   utilizando qué comando se crean? 
 
 3) ¿Qué sistemas de archivos están soportados por la opción -r de los comandos
    de re-dimensión? ¿Qué sucede si el sistema de archivos contenido no está 
@@ -56,7 +57,7 @@ gestión de almacenamiento con LVM2.
    ¿Es posible crear un sistema de archivos raíz bajo LVM?
    ¿Qué sucede con el directorio /boot?
   
-10) Escriba un procedimiento para importar/exportar discos bajo LVM y Linux md
+10) Escriba un PROCEDIMIENTO para importar/exportar discos bajo LVM y Linux md
     Verifique con los discos provistos por la cátedra. 
 
     * Pasos para incorporar los discos al sistema (loop devices).
@@ -67,14 +68,14 @@ gestión de almacenamiento con LVM2.
     * Pasos para remover los dispositivos loop y volver al estado original.
  
 
-11) Escriba un procedimiento para realizar el backup del directorio /home y sub-
+11) Escriba un PROCEDIMIENTO para realizar el backup del directorio /home y sub-
     directorios. 
     - utilice snapshot. ¿Qué consideración verificación debe hacer sobre los 
       sistemas de archivos? Piense acerca de cómo pueden estar distribuidos los
       sistemas de archivos.  
     - Asuma que se utiliza un directorio NFS remoto para almacenar dicho backup. 
 12) Ud. ha observado que un disco (sda) está comenzando a fallar. Sobre el 
-    mismo se encuentran varios LVs. Escriba un procedimiento para mover todos
+    mismo se encuentran varios LVs. Escriba un PROCEDIMIENTO para mover todos
     los LVs de el disco en cuestión a un nuevo disco (sdb). Indique las consi-
     deraciones de tamaño que debe contemplar el/la administrador/a. 
     - ¿Qué sucede con su procedimiento si uno de los LVs es un mirror?  
@@ -86,4 +87,4 @@ gestión de almacenamiento con LVM2.
 14) Realizar los ejercicios propuestos en "Temas de práctica" del apunte de 
     cátedra de la sección de LVM. 
 
-15) ¿Qué significa el código de color de los discos rígidos?
+15) ¿Qué significa el código de color de los discos rígidos? 
