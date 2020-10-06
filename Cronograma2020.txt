@@ -61,10 +61,11 @@ OCTUBRE
 	Alta disponibilidad - cluster
 NOVIEMBRE
 11 Semana (03 y 05 noviembre)
-	03 Virtualización  - Entrega TPO Alta disponibilidad
-        05 Examen parcial -  Alta disponibilidad  
+	03 Alta disponibilidad - cluster
+	05 Alta disponibilidad  - Entrega TPO Alta disponibilidad
 12 Semana (10 y 12 noviembre)
-	Virtualización 
+        10 Examen parcial -  Alta disponibilidad  
+	12 Virtualización 
 13 Semana (17 y 19 noviembre)
         Virtualización
 14 Semana (24 y 26 noviembre)
