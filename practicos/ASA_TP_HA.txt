@@ -1,8 +1,8 @@
 
-  #####################
-  # ASA - TUASSL 2019 #
-  #   HA - TP01	      #
-  #####################
+  #######################
+  # ASA - TUASSL 2020   #
+  # Alta Disponibilidad #
+  #######################
 
 NOTAS PRELIMINARES: 
 El práctico a continuación pretende aumentar la comprensión acerca de la
@@ -11,16 +11,20 @@ de Pacemaker. La guía puede ser complementada con el documento
 "Configuration Explained" provisto en el sitio de Clusterlabs. 
 Fuente de documentación: http://clusterlabs.org/
 
+GUIA 2.0: 
+https://clusterlabs.org/pacemaker/doc/en-US/Pacemaker/2.0/html/Clusters_from_Scratch/index.html
+
 
 PASOS PRELIMINARES: 
 1. Configurar un hostname distinto para cada nodo. 
-2. Cambiar la contraseña de root. 
+2. Cambiar la contraseña de asauser (no cambiar la de root). 
 3. Documentar la configuración de los dispositivos de almacenamiento y sistemas 
    de archivos.
 4. Cuál es el archivo que identifica la versión de Centos del sistema. 
 5. Documente la configuración de red. 
 6. ¿Utiliza systemd o init? 
 7. ¿Cuál es el objetivo final del laboratorio? 
+8. Instale el software screen y úselo para no perjudicar la vm durante su trabajo. 
 
 PREGUNTAS HASTA 2.4.2
 1. ¿Comparable a qué software en Debian es yum?¿Comparable a qué software en 
@@ -32,28 +36,27 @@ PREGUNTAS HASTA 2.4.2
 5. ¿Cómo verifica que determinado paquete ya se encuentra instalado?
 6. ¿Cuál es la diferencia entre el método utilizado en 2.4.2 y el uso de 
    ssh-key-gen y ssh-copy-id?
-7. ¿Para qué sirven los comandos screen y nohup?¿Por qué podrían serle de 
    utilidad?
-8. Guarde el listado total de servicios corriendo hasta el momento. 
+7. Guarde el listado total de servicios en ejecución hasta el momento. 
 
 
-PREGUNTAS DESDE 2.5 HASTA 2.6.3
-0. Guarde toda la salida de la instalación de paquetes propuesta en 2.5
-1. Indique brevemente para qué sirve cada uno de los paquetes instalados en 2.5 
+PREGUNTAS DESDE 3 HASTA 3.3.3
+0. Guarde toda la salida de la instalación de paquetes propuesta en 3.2
+1. Indique brevemente para qué sirve cada uno de los paquetes instalados en 3.2
    Obtenga la información usando comandos del sistema. 
-2. Liste y OBSERVE el contenido de los paquetes instalados en la sección 2.5
-3. ¿Existen nuevos servicios relacionados al software instalado en 2.5?
+2. Liste y OBSERVE el contenido de los paquetes instalados en la sección 3.2
+3. ¿Existen nuevos servicios relacionados al software instalado en 3.2?
 4. Una vez instalado el software de cluster ¿cómo puede verificar los nuevos 
    servicios del sistema?
-5. ¿Cuál es el objetivo del enlace simbólico creado en la sección 2.6.2?
-6. En la sección 2.6 indica hacer cambios en el firewall. ¿Por qué 
+5. ¿Cuál es el objetivo del enlace simbólico creado en la sección 3.3.2?
+6. En la sección 3.3 indica hacer cambios en el firewall. ¿Por qué 
    cree que es necesario?¿Cómo puede darse cuenta qué firewall se 
    encuentra en uso? ¿Qué puertos son requeridos para el cluster? 
-7. Sobre el software pcs, en la sección 2.6.2: ¿Cuál es el shell de 
+7. Sobre el software pcs, en la sección 3.3.2: ¿Cuál es el shell de 
    la cuenta de usuario creada para los fines de pcs?¿Qué efecto 
    tiene dicho shell? ¿En qué momento se crea la cuenta hacluster?
    ¿Hay otros usuarios con ese shell definido?
-8. En la sección 2.6.3 los comandos se ejecutan en un sólo nodo. 
+8. En la sección 3.3.3 los comandos se ejecutan en un sólo nodo. 
    ¿Por qué? ¿Cuál es la función del comando pcs?
 9. Guarde la salida del comando pcs cluster setup. Observe la salida del 
    comando "pcs status". 
@@ -62,7 +65,7 @@ PREGUNTAS DESDE 2.5 HASTA 2.6.3
 8. Observe el archivo de configuración creado por pcs para Corosync. 
    ¿En qué momento se instaló Corosync?¿Cuál es su función?
 
-PREGUNTAS A PARTIR DE SECCIÓN 3 Y HASTA 5.1 
+PREGUNTAS A PARTIR DE SECCIÓN 3.4 Y HASTA 4.4 
 0. ¿Es pcs parte del "stack" de cluster (observe los gráficos de la 
    presentación). ¿Cuál es su función?¿Podemos prescindir de este software?
    ¿Existe algún servicio o demonio relacionado a pcs?
@@ -90,7 +93,7 @@ PREGUNTAS A PARTIR DE SECCIÓN 3 Y HASTA 5.1
 9. Observe la salida de "pcs status --full" ¿Existen _recursos_ configurados  
    hasta el momento?
 
-PREGUNTAS A PARTIR DE 5.2 hasta 5.4 (INCLUSIVE)
+PREGUNTAS A PARTIR DE 5 hasta 6.3 
 1. Los recursos del cluster son la razón de ser del cluster. 
    Son los servicios altamente disponibles. Existen distintas 
    formas de definir los servicios y darle herramientas al 
@@ -98,7 +101,7 @@ PREGUNTAS A PARTIR DE 5.2 hasta 5.4 (INCLUSIVE)
    ¿Estas formas de definir servicios tiene que ver sólo con el cluster? 
 
 2. Ubique dentro de /usr/lib/ocf/resource.d/ el script 
-   correspondiente a la IP configurada en 5.2. Observe brevemente su contenido,
+   correspondiente a la IP configurada en 6.1. Observe brevemente su contenido,
    en particular las líneas finales que procesan la acción a realizar con el 
    servicio. 
 
@@ -110,54 +113,48 @@ PREGUNTAS A PARTIR DE 5.2 hasta 5.4 (INCLUSIVE)
    IP configurada en la interfaz de red (comando ip). ¿En qué nodo se inició el 
    recurso? 
 
-6. PREVIO a realizar el failover pedido en la sección 5.3, observe el estado de
+6. PREVIO a realizar el failover pedido en la sección 6.2, observe el estado de
    recurso creado, y mantenga un ping desde un lugar remoto para observar lo 
    que sucede con el recurso. ¿Cuán apreciable resultó el tiempo de downtime de
    recurso? 
 
-7. PREVIO a modificar la propiedad resource-stickiness en 5.4, observe la salid
+7. PREVIO a modificar la propiedad resource-stickiness en 6.3, observe la salid
    del comando "pcs resource defaults". 
 
-8. ¿A qué recursos afecta el resource-stickiness configurado en 5.4? ¿Para qué 
+8. ¿A qué recursos afecta el resource-stickiness configurado en 6.3? ¿Para qué 
    sirve?
 
-PREGUNTAS SECCIÓN 6
-1. Lea atentamente y comente la nota que dice "Important" en la sección 6.1. 
+PREGUNTAS SECCIÓN 7
+1. Lea atentamente y comente la nota que dice "Important" en la sección 7.1. 
    Una vez instalado, verifique el estado del servicio httpd. 
 
 2. Ubique y revise brevemente el script que utiliza el cluster para administrar 
-   el recurso apache en la sección 6.4.
+   el recurso apache en la sección 7.4.
  
 3. Lea brevemente la página man correspondiente al recurso.
  
-4. Una vez creado el recurso http (sección 6.4), OBSERVE en qué nodo se inició 
+4. Una vez creado el recurso http (sección 7.4), OBSERVE en qué nodo se inició 
    el recurso web y dónde se encuentra el recurso IP. ¿Por qué sucede esto?
 
-5. ¿Qué sucedió con los recursos al establecer la restricción en la sección 6.5?
+5. ¿Qué sucedió con los recursos al establecer la restricción en la sección 7.5?
    ¿En qué otra situación los recursos se han migrado durante el transcurso de 
    la guía?
 
-6. Entre la sección 6.5 y 6.8 se establecen restricciones entre los recursos 
-   para lograr ciertos efectos. Una vez alcanzada la sección 6.8 revise 
-   nuevamente los efectos de cada uno de los pasos realizados a partir de 6.5 
+6. Entre la sección 7.5 y 7.8 se establecen restricciones entre los recursos 
+   para lograr ciertos efectos. Una vez alcanzada la sección 7.8 revise 
+   nuevamente los efectos de cada uno de los pasos realizados a partir de 7.5 
 
 7. Guarde y evalúe la salida de los comandos: "pcs constraint" y 
    "crm_simulate -sL" 
 
-8. Observe la salida de crm_simulate luego de el failover manual de 6.8. 
+8. Observe la salida de crm_simulate luego de el failover manual de 7.8. 
    Adicionalmente restaure la restricción de ubicación de tal modo que el 
    recurso apache prefiera en 50 al nodo1. 
 
-9. Una vez completada la sección 6.8: realice un failover ida y vuelta, 
+9. Una vez completada la sección 7.8: realice un failover ida y vuelta, 
    observando el tiempo de downtime del servicio http. 
 
-PREGUNTAS SECCIÓN 7 
-------------------------------------------------------------------------------
-NOTA: En la página 42 de la guía se indica en una nota IMPORTANT, descargar 
-      el script OCF, para controlar el recurso drbd, desde la página del 
-      desarrollador. Dicho link esta DESACTUALIZADO, en su lugar utilice: 
-   https://raw.githubusercontent.com/LINBIT/drbd-utils/master/scripts/drbd.ocf
-------------------------------------------------------------------------------
+PREGUNTAS SECCIÓN 8 
 
 0. LEA LA SECCIÓN SOBRE DRBD DEL APUNTE DE CÁTEDRA. 
 1. Observando restricción de orden: Reiniciar el recurso IP y observar el 
@@ -176,17 +173,17 @@ NOTA: En la página 42 de la guía se indica en una nota IMPORTANT, descargar
 
 4. Repetir 3) pero levantando primero el último nodo activo en el cluster.
 
-5. Observe el contenido de los paquetes instalados en 7.1. ¿Qué provee cada uno?
+5. Observe el contenido de los paquetes instalados en 8.1. ¿Qué provee cada uno?
    ¿Fueron utilizados repositorios oficiales?
 
-6. Además del puerto abierto para drbd (sección 7.1) ¿Qué otros puertos son 
+6. Además del puerto abierto para drbd (sección 8.1) ¿Qué otros puertos son 
    requeridos para  el funcionamiento del cluster? Haga una lista. 
 
-7. Observe la nota final en la página 42, sección 7.1. Indique qué necesidades
+7. Observe la nota final en la página 42, sección 8.1. Indique qué necesidades
    de hardware y software implicaría el cambio. ¿Requiere mayor inversión?
    ¿Elimina algún SPOF?¿Agrega seguridad?
 
-8. PREVIO a la sección 7.4, verifique que el modulo del kernel de drbd se 
+8. PREVIO a la sección 8.4, verifique que el modulo del kernel de drbd se 
    encuentra cargado, caso contrario cárguelo. ¿En que paquete se encuentra
    el módulo del kernel? Ayuda:lsmod,modprobe/insmod,rpm -ql
 
@@ -201,7 +198,7 @@ NOTA: En la página 42 de la guía se indica en una nota IMPORTANT, descargar
     wwwdata) ejecute "watch cat /proc/drbd" en el segundo nodo para observar
     la sincronización. ¿A través de qué medio se sincronizan los datos? 
 
-12. Una vez configurado drbd, y PREVIO a la sección 7.6, detener el cluster 
+12. Una vez configurado drbd, y PREVIO a la sección 8.6, detener el cluster 
     (ambos nodos) y migrar el dispositivo drbd manualmente (ida y vuelta). 
    = Observe todo el proceso realizando watch cat /proc/drbd en ambos nodos= 
     Probar montaje manual y escritura, en ambos nodos. DESMONTAR antes de 
@@ -209,10 +206,10 @@ NOTA: En la página 42 de la guía se indica en una nota IMPORTANT, descargar
     relación entre el software drbd y Pacemaker; este último no tiene 
     control alguno sobre el almacenamiento. 
 
-13. Observar la creación de los recursos en 7.6.¿Por qué cree necesario este 
+13. Observar la creación de los recursos en 8.6.¿Por qué cree necesario este 
     tipo de recurso master/slave?¿Qué diferencia hay con cluster IP y Apache?
 
-14. En la sección 7.7 se define el recurso que controla el sistema de archivos.
+14. En la sección 8.7 se define el recurso que controla el sistema de archivos.
     ¿Quién controla el montaje del mismo? ¿Se montará el sistema de archivos 
     durante el inicio del sistema? Compruebe deteniendo el cluster y reinicie 
     los nodos. 

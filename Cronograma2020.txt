@@ -51,21 +51,21 @@ SEPTIEMBRE
 OCTUBRE 
 7  Semana (06 y 08 octubre)
         Martes 06 LVM 
-	Jueves 08 Entrega TP0 LVM - Alta disponibilidad 
+	Jueves 08 Entrega TP0 LVM 
 8  Semana (13 y 15 de octubre)
 	Martes 13 Entrega TP0 LVM - Alta disponibilidad 
         Jueves 15 Examen parcial ALMACENAMIENTO 
 9  Semana (20 y 22 octubre)
-	Alta disponibilidad - cluster 
+	Alta disponibilidad - cluster - asignación de VMS 
 10 Semana (27 y 29 octubre)
 	Alta disponibilidad - cluster
 NOVIEMBRE
 11 Semana (03 y 05 noviembre)
 	03 Alta disponibilidad - cluster
-	05 Alta disponibilidad  - Entrega TPO Alta disponibilidad
+	05 Alta disponibilidad - cluster 
 12 Semana (10 y 12 noviembre)
-        10 Examen parcial -  Alta disponibilidad  
-	12 Virtualización 
+        10 Entrega TPO Alta disponibilidad
+	12 Examen parcial Alta disponibilidad 
 13 Semana (17 y 19 noviembre)
         Virtualización
 14 Semana (24 y 26 noviembre)
